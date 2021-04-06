@@ -1,12 +1,9 @@
 from __future__ import print_function
 
-import datetime
 import os
-import re
 import subprocess
 import time
-
-from signal import signal, SIGINT
+from signal import SIGINT, signal
 
 # Set environment for ClientCli
 KEY = "LD_LIBRARY_PATH"
@@ -38,10 +35,8 @@ def launch():
     return server
 
 
-
-
 def start(fiber_length, frequency_resolution, spatial_resolution,
-          ampli_power,cutoff_frequency, gauge_length,
+          ampli_power, cutoff_frequency, gauge_length,
           sampling_resolution, pipeline_fname):
     """Start Catalyst Server acquisition"""
     subprocess.call(
@@ -98,50 +93,3 @@ def get_params():
         env=ENV
     )
     return out.splitlines()[1:]
-
-
-def parse_error(line):
-    """Search for errors"""
-    s = re.search(r"error", line, re.IGNORECASE)
-    if s is not None:
-        return True
-
-
-def parse_utcdatetime_block(line):
-    """Get the UTC datetime of each block"""
-    pattern = r"\[CATALYST\] Calling pipeline on block (?P<timestamp>\d+)\.\d+ (?P<block>\d+)"
-    m = re.match(pattern, line)
-    if m is not None:
-        timestamp = float(m.group("timestamp"))
-        utcdatetime = datetime.datetime.utcfromtimestamp(timestamp)
-        block = int(m.group("block"))
-        return utcdatetime, block
-    else:
-        return None, None
-
-
-def parse_gpstime(line):
-    """Get the GPS time information"""
-    pattern = r"GENEPULSE Sending TimeStamp"
-    m = re.match(pattern, line)
-    return m
-
-
-def monitor(server):
-    while True:
-        line = server.stdout.readline()
-        utcdatetime, block = parse_utcdatetime_block(line)
-        if utcdatetime and block:
-            print(utcdatetime, block)
-        gpstime = parse_gpstime(line)
-        if gpstime:
-            print(line)
-
-
-if __name__ == "__main__":
-    server = launch()
-    start(2000, 1, 1, 24, 1000, 10, 80, "/home/febus/Pipelines/SR_writer.py")
-    monitor(server)
-
-
-
