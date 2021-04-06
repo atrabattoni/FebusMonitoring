@@ -99,6 +99,7 @@ def get_params():
 
 
 def enable():
+    """Enable HDF5 writing"""
     try:
         os.remove(STOP_WRITINGS_PATH)
     except OSError:
@@ -106,4 +107,5 @@ def enable():
 
 
 def disable():
+    """Disable HDF5 writing"""
     open(STOP_WRITINGS_PATH, "a").close()
