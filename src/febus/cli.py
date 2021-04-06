@@ -15,7 +15,7 @@ VALUE = """
 ENV = os.environ.copy()
 ENV[KEY] = ENV[KEY] + VALUE
 
-# Set path to enable/disable hdf5 writting
+# Set path to enable/disable hdf5 writing
 ENABLE_PATH = "/home/febus/.hdf5_enable"
 
 
