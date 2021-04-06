@@ -18,7 +18,11 @@ def chunk(server, nblock):
     while True:
         line = server.stdout.readline()
         utcdatetime, blockid = parse_utcdatetime_blockid(line)
-        if blockid % nblock == 0:
-            disable()
-        if blockid % nblock == 1:
-            enable()
+        if utcdatetime and blockid:
+            if blockid % nblock == nblock - 1:
+                print("disable")
+                disable()
+            if blockid % nblock == 0:
+                print("enable")
+                enable()
+            print(utcdatetime, blockid)
