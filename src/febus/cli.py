@@ -19,7 +19,7 @@ ENV[KEY] = ENV[KEY] + VALUE
 def launch():
     """Launch a Catalyst Server with GPS that can be terminated with CTRL+C"""
     server = subprocess.Popen(
-        ["/opt/febus-a1/bin/run-server.sh", "gps"],
+        ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh", "gps"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
