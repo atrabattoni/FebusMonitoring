@@ -15,6 +15,9 @@ VALUE = """
 ENV = os.environ.copy()
 ENV[KEY] = ENV[KEY] + VALUE
 
+# Set path to enable/disable hdf5 writting
+ENABLE_PATH = "/home/febus/.hdf5_enable"
+
 
 def launch():
     """Launch a Catalyst Server with GPS that can be terminated with CTRL+C"""
@@ -93,3 +96,11 @@ def get_params():
         env=ENV
     )
     return out.splitlines()[1:]
+
+
+def enable():
+    open(ENABLE_PATH, "a").close()
+
+
+def disable():
+    os.remove(ENABLE_PATH)
