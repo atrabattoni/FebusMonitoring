@@ -16,7 +16,7 @@ ENV = os.environ.copy()
 ENV[KEY] = ENV[KEY] + VALUE
 
 # Set path to enable/disable hdf5 writing
-ENABLE_PATH = "/home/febus/.hdf5_enable"
+STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
 
 
 def launch():
@@ -99,8 +99,11 @@ def get_params():
 
 
 def enable():
-    open(ENABLE_PATH, "a").close()
+    try:
+        os.remove(STOP_WRITINGS_PATH)
+    except OSError:
+        pass
 
 
 def disable():
-    os.remove(ENABLE_PATH)
+    open(STOP_WRITINGS_PATH, "a").close()
