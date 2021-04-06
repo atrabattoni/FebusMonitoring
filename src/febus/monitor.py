@@ -1,7 +1,10 @@
 from __future__ import print_function
 
-from .parser import parse_utcdatetime_blockid, parse_gpstime_pulseid
-from .cli import enable, disable
+import time
+
+from .cli import disable, enable, get_params, get_status, start, stop
+from .parser import parse_gpstime_pulseid, parse_utcdatetime_blockid
+
 
 def monitor(server):
     while True:
@@ -26,3 +29,14 @@ def chunk(server, nblock):
                 print("enable")
                 enable()
             print(utcdatetime, blockid)
+
+
+def robust(params):  # TODO: use get_params instead
+    while True:
+        status = get_status()
+        if not status == "running":
+            disable()
+            stop()
+            enable()
+            start(**params)
+            time.sleep(1)
