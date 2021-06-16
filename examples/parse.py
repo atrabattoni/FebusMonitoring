@@ -1,3 +1,7 @@
+"""
+Offline parsing of some terminal logs.
+"""
+
 from __future__ import print_function
 
 import sys
@@ -6,14 +10,14 @@ sys.path.append("/home/trabattoni/Desktop/das/febus/src")
 import datetime
 from febus.parser import parse_utcdatetime_block, parse_gpstime_pulseid
 
-fname = "/home/trabattoni/Desktop/das/data/log/log_3236"
+fname = "path_to_log"  # to change by the user
 
 
 verbose = False
 count = 0
 errorline = 0
 line = True
-with open(fname, "r") as server: 
+with open(fname, "r") as server:  # the file simulate the server
     while line:
         line = server.readline()
         utcdatetime, blockid = parse_utcdatetime_block(line)

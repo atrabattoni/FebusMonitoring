@@ -1,3 +1,7 @@
+"""
+Functions to take actions depending on the Febus server state.
+"""
+
 from __future__ import print_function
 
 import time

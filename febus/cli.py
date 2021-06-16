@@ -1,3 +1,8 @@
+"""
+Python wrappers to Febus CLI tools. Lauching the server withing python allows
+to get the output of the terminal for further parsing. 
+"""
+
 from __future__ import print_function
 
 import os

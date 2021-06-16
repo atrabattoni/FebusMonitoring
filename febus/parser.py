@@ -1,3 +1,7 @@
+"""
+Functions to extract relevant information in the server logs.
+"""
+
 from __future__ import print_function
 
 import datetime

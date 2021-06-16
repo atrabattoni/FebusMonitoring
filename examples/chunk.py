@@ -1,3 +1,7 @@
+"""
+Allows to write smaller files than one hour by enabling and disabling HDF5 writing.
+"""
+
 from __future__ import print_function
 
 import sys
