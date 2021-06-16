@@ -5,7 +5,7 @@ Allows to write smaller files than one hour by enabling and disabling HDF5 writi
 from __future__ import print_function
 
 import sys
-sys.path.append("/home/febus/febus/src")
+sys.path.append("/home/febus/febus")  # depend on the folder location
 
 import datetime
 from febus.cli import launch, start, enable

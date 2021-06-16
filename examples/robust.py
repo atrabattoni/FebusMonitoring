@@ -8,7 +8,7 @@ from febus.cli import launch, start, enable
 import datetime
 
 import sys
-sys.path.append("/home/febus/febus/src")
+sys.path.append("/home/febus/febus")  # depend on the folder location
 
 params = {
     "fiber_length": 2000,

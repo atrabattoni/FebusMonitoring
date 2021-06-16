@@ -5,7 +5,7 @@ Offline parsing of some terminal logs.
 from __future__ import print_function
 
 import sys
-sys.path.append("/home/trabattoni/Desktop/das/febus/src")
+sys.path.append("/home/febus/febus")  # depend on the folder location
 
 import datetime
 from febus.parser import parse_utcdatetime_block, parse_gpstime_pulseid
