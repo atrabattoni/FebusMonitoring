@@ -11,6 +11,7 @@ from .parser import parse_gpstime_pulseid, parse_utcdatetime_blockid
 
 
 def monitor(server):
+    """Print server info"""
     while True:
         line = server.stdout.readline()
         utcdatetime, block = parse_utcdatetime_blockid(line)
@@ -22,6 +23,7 @@ def monitor(server):
 
 
 def chunk(server, nblock):
+    """Write smaller files by en/disabling HDF5 writing"""
     while True:
         line = server.stdout.readline()
         utcdatetime, blockid = parse_utcdatetime_blockid(line)
@@ -35,7 +37,8 @@ def chunk(server, nblock):
             print(utcdatetime, blockid)
 
 
-def robust(params):  # TODO: use get_params instead
+def robust(params):
+    """Robust aquisition that auto-restart if needed"""
     while True:
         status = get_status()
         if not status == "running":
