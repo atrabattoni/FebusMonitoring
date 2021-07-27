@@ -2,8 +2,6 @@
 Functions to take actions depending on the Febus server state.
 """
 
-from __future__ import print_function
-
 import time
 
 from .cli import disable, enable, get_params, get_status, start, stop

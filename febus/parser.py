@@ -2,8 +2,6 @@
 Functions to extract relevant information in the server logs.
 """
 
-from __future__ import print_function
-
 import datetime
 import re
 
@@ -39,3 +37,8 @@ def parse_gpstime_pulseid(line):
         return gpstime, pulseid
     else:
         return None, None
+
+
+def parse_new_loop(line):
+    """Find start of loop"""
+    return line == "New loop \n"
