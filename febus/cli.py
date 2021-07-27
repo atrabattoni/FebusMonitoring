@@ -38,6 +38,7 @@ def launch(gps=True):
     def handler(signal_received, frame):
         server.terminate()
         print("\nServer Terminated")
+        raise KeyboardInterrupt
         # exit(0)
 
     signal(SIGINT, handler)
