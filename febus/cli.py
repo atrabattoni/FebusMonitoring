@@ -32,6 +32,7 @@ def launch(gps=True):
         bufsize=1,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        encoding="uft-8"
     )
     time.sleep(1)
     print("Server Launched")

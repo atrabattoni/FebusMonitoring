@@ -10,6 +10,6 @@ state_updater = fw.StateUpdater("state")
 
 line = True
 while line:
-    line = server.stdout.readline().decode()
+    line = server.stdout.readline()
     raw_state_updater.parse(line)
     state_updater.parse(line)
