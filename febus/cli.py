@@ -33,7 +33,7 @@ def launch(gps=True):
         stderr=subprocess.STDOUT,
     )
     time.sleep(1)
-    print("\nServer Launched")
+    print("Server Launched")
 
     original_handler = getsignal(SIGINT)
 

@@ -11,7 +11,7 @@ from .parser import parse_gpstime_pulseid, parse_utcdatetime_blockid
 def monitor(server):
     """Print server info"""
     while True:
-        line = server.stdout.readline()
+        line = server.stdout.readline().decode("utf-8")
         utcdatetime, block = parse_utcdatetime_blockid(line)
         if utcdatetime and block:
             print(utcdatetime, block)
@@ -23,7 +23,7 @@ def monitor(server):
 def chunk(server, nblock):
     """Write smaller files by en/disabling HDF5 writing"""
     while True:
-        line = server.stdout.readline()
+        line = server.stdout.readline().decode("utf-8")
         utcdatetime, blockid = parse_utcdatetime_blockid(line)
         if utcdatetime and blockid:
             if blockid % nblock == nblock - 1:
