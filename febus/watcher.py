@@ -48,4 +48,4 @@ class StateUpdater():
     def dump(self):
         with open(self.fname, "w") as file:
             for key, item in self.info.items():
-                file.write(f"{key}: {item}\n")
+                file.write("{}: {}\n".format(key, item))
