@@ -6,7 +6,7 @@ to get the output of the terminal for further parsing.
 import os
 import subprocess
 import time
-from signal import SIGINT, signal
+from signal import SIGINT, signal, getsignal
 
 # Set environment for ClientCli
 KEY = "LD_LIBRARY_PATH"
@@ -35,11 +35,13 @@ def launch(gps=True):
     time.sleep(1)
     print("\nServer Launched")
 
+    original_handler = getsignal(SIGINT)
+
     def handler(signal_received, frame):
         server.terminate()
         print("\nServer Terminated")
+        signal(SIGINT, original_handler)
         raise KeyboardInterrupt
-        # exit(0)
 
     signal(SIGINT, handler)
     return server
