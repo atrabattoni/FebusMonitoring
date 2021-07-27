@@ -1,7 +1,7 @@
 import febus.cli as fc
 import febus.watcher as fw
 
-server = fc.launch()
+server = fc.launch(gps=False)
 fc.enable()
 fc.start(2000, 1, 1, 24, 1000, 10, 80, "/home/febus/Pipelines/SR_writer.py")
 

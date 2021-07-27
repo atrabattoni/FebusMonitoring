@@ -16,7 +16,7 @@ params = {
     "pipeline_fname": "/home/febus/Pipelines/SR_writer.py",
 }
 
-server = launch()
+server = launch(gps=False)
 enable()
 start(**params)
 robust(params)
