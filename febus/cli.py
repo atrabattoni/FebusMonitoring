@@ -29,6 +29,7 @@ def launch(gps=True):
         cmd.append("gps")
     server = subprocess.Popen(
         cmd,
+        bufsize=1,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
