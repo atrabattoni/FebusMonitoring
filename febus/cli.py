@@ -29,11 +29,11 @@ def launch(gps=True):
         cmd.append("gps")
     server = subprocess.Popen(
         cmd,
-        bufsize=1,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
     )
+    server.stdout.reconfigure(write_through=True)
     time.sleep(1)
     print("Server Launched")
 
