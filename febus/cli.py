@@ -22,10 +22,13 @@ ENV[KEY] = ENV[KEY] + VALUE
 STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
 
 
-def launch():
-    """Launch a Catalyst Server with GPS that can be terminated with CTRL+C"""
+def launch(gps=True):
+    """Launch a Catalyst Server that can be terminated with CTRL+C"""
+    cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
+    if gps:
+        cmd.append("gps")
     server = subprocess.Popen(
-        ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh", "gps"],
+        cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
@@ -35,7 +38,7 @@ def launch():
     def handler(signal_received, frame):
         server.terminate()
         print("\nServer Terminated")
-        exit(0)
+        # exit(0)
 
     signal(SIGINT, handler)
     return server
