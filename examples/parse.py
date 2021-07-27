@@ -2,6 +2,8 @@
 Offline parsing of some terminal logs.
 """
 
+from __future__ import print_function
+
 import datetime
 from febus.parser import parse_utcdatetime_block, parse_gpstime_pulseid
 

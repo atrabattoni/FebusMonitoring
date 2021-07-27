@@ -3,6 +3,8 @@ Python wrappers to Febus CLI tools. Lauching the server withing python allows
 to get the output of the terminal for further parsing. 
 """
 
+from __future__ import print_function
+
 import os
 import subprocess
 import time
@@ -29,10 +31,8 @@ def launch(gps=True):
         cmd.append("gps")
     server = subprocess.Popen(
         cmd,
-        bufsize=1,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        text=True,
     )
     time.sleep(1)
     print("Server Launched")
