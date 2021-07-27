@@ -33,7 +33,7 @@ def launch(gps=True):
         stderr=subprocess.STDOUT,
         text=True,
     )
-    server.stdout.reconfigure(write_through=True)
+    server.stdout.reconfigure(line_buffering=True, write_through=True)
     time.sleep(1)
     print("Server Launched")
 
