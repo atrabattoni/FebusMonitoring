@@ -2,16 +2,10 @@
 Offline parsing of some terminal logs.
 """
 
-from __future__ import print_function
-
-import sys
-sys.path.append("/home/febus/febus")  # depend on the folder location
-
 import datetime
 from febus.parser import parse_utcdatetime_block, parse_gpstime_pulseid
 
 fname = "path_to_log"  # to change by the user
-
 
 verbose = False
 count = 0
@@ -39,4 +33,3 @@ with open(fname, "r") as server:  # the file simulate the server
         count += 1
         if verbose and count - errorline > 1000:
             break
-
