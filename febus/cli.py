@@ -31,6 +31,7 @@ def launch(gps=True):
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        shell=True,
         text=True,
     )
     server.stdout.reconfigure(line_buffering=True, write_through=True)
