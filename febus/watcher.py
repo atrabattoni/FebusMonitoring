@@ -13,7 +13,7 @@ class Watcher():
 
     def parse(self, line):
         if parser.parse_new_loop(line):
-            if None in self.info:
+            if None in self.info.values():
                 error = True
             else:
                 error = False
