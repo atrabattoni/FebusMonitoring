@@ -31,7 +31,7 @@ class Watcher():
         with open(self.info_fname, "w") as file:
             for key, item in self.info.items():
                 file.write(f"{key}: {item}\n")
-            self.info = {}
+        self.info = {}
 
     def dump_lines(self):
         with open(self.lines_fname, "w") as file:
