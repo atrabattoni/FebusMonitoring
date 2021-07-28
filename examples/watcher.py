@@ -7,7 +7,6 @@ fc.start(2000, 1, 1, 24, 1000, 10, 80, "/home/febus/Pipelines/SR_writer.py")
 
 watcher = fw.Watcher("state", "raw_state")
 
-line = True
-while line:
+while True:
     line = server.stdout.readline()
     watcher.parse(line)

@@ -15,8 +15,6 @@ class Watcher():
         if parser.parse_new_loop(line):
             self.dump_info()
             self.dump_lines()
-            self.info = {}
-            self.lines = []
 
         self.info["gpstime"], self.info["pulseid"] = (
             parser.parse_gpstime_pulseid(line))
@@ -27,12 +25,13 @@ class Watcher():
         self.info["writetime"] = parser.parse_writetime(line)
         self.info["coprocessingtime"] = parser.parse_coprocessingtime(line)
 
-        self.lines += line
+        self.lines.append(line)
 
     def dump_info(self):
         with open(self.info_fname, "w") as file:
             for key, item in self.info.items():
                 file.write(f"{key}: {item}\n")
+            self.info = {}
 
     def dump_lines(self):
         with open(self.lines_fname, "w") as file:
