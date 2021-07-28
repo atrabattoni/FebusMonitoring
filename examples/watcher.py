@@ -2,7 +2,7 @@ import febus.cli as fc
 import febus.watcher as fw
 
 server = fc.launch(gps=False)
-fc.start(2000, 1, 1, 24, 1000, 10, 80, "/home/febus/Pipelines/SR_writer.py")
+fc.start(4500, 2, 1, 30, 2000, 1, 40, "/home/febus/Pipelines/SR_writer.py")
 fc.enable()
 file_watcher = fw.FileWatcher()
 terminal_watcher = fw.TerminalWatcher(
