@@ -4,15 +4,17 @@ import pathlib
 from . import parser
 
 
-class TerminalWatcher():
+class Watcher():
 
-    def __init__(self, server, callbacks, info_fname, lines_fname):
-        self.server = server
-        self.callbacks = callbacks
-        self.info_fname = info_fname
-        self.lines_fname = lines_fname
+    def __init__(self):
+        self.currentfile = None
+        self.directory = pathlib.Path(".")
+        self.files = list(self.directory.glob("*.h5"))
         self.info = {}
+        self.info_fname = "info"
         self.lines = []
+        self.lines_fname = "lines"
+        self.newfile = None
 
     def parse(self, line):
         if parser.parse_new_loop(line):
@@ -22,8 +24,7 @@ class TerminalWatcher():
                 error = False
             self.dump_info(error=error)
             self.dump_lines(error=error)
-            for callback in self.callbacks:
-                callback.watch()
+            self.watch_files()
 
         gpstime, pulseid = parser.parse_gpstime_pulseid(line)
         if (gpstime is not None) and (pulseid is not None):
@@ -72,24 +73,12 @@ class TerminalWatcher():
             file.writelines(self.lines)
         self.lines = []
 
-
-class FileWatcher:
-
-    def __init__(self):
-        self.directory = pathlib.Path(".")
-        self.files = list(self.directory.glob("*.h5"))
-        self.currentfile = None
-        self.newfile = None
-
-    def watch(self):
+    def watch_files(self):
         files = list(self.directory.glob("*.h5"))
         newfiles = [file for file in files if file not in self.files]
         self.files.extend(newfiles)
         if len(newfiles) == 1:
             self.newfile, = newfiles
             self.currentfile = self.newfile
-            print(self.currentfile)
-            print(self.newfile)
-            print()
         else:
             self.newfile = None
