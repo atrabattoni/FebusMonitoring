@@ -20,9 +20,9 @@ class Watcher():
                 error = True
             else:
                 error = False
+            self.log_info()
             self.dump_info(error=error)
             self.dump_lines(error=error)
-            self.log_info()
 
         gpstime, pulseid = parser.parse_gpstime_pulseid(line)
         if (gpstime is not None) and (pulseid is not None):
@@ -87,9 +87,7 @@ class Watcher():
         fname = str(self.currentfile).replace("h5", "log")
         sep = ","
         with open(fname, "a") as file:
-            lines = []
             if self.newfile is not None:
-                lines.append(sep.join(self.info.keys()) + "\n")
+                file.write(sep.join(self.info.keys()) + "\n")
             values = [str(value) for value in self.info.values()]
-            lines.append(sep.join(values) + "\n")
-            file.writelines(lines)
+            file.write(sep.join(values) + "\n")
