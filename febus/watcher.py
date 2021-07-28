@@ -25,7 +25,7 @@ class Watcher():
             self.dump_info(error=error)
             self.dump_lines(error=error)
             self.watch_files()
-            self.info["currentfile": self.currentfile]
+            self.info["currentfile"] = self.currentfile
 
         gpstime, pulseid = parser.parse_gpstime_pulseid(line)
         if (gpstime is not None) and (pulseid is not None):
