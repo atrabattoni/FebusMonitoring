@@ -55,7 +55,7 @@ def parse_trigid(line):
 
 def parse_utcdatetime_blockid(line):
     """Get the UTC datetime and ID of each block"""
-    pattern = r"CoProcessing (?P<blockid>\d+) \d+\.\d+ \|realtime: (?P<timestamp>\d+\.\d+)"
+    pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) \d+\.\d+ \|realtime: (?P<timestamp>\d+\.\d+)\| \d+\.\d+ -?\d+\.\d+"
     m = re.match(pattern, line)
     if m is not None:
         timestamp = float(m.group("timestamp"))
@@ -79,7 +79,7 @@ def parse_writetime(line):
 
 def parse_coprocessingtime(line):
     """Get the block write time"""
-    pattern = r"Coprocessing took (?P<coprocessingtime>\d+\.\d+) \(seconds\)"
+    pattern = r"###Coprocessing took (?P<coprocessingtime>\d+\.\d+) \(seconds\)"
     m = re.match(pattern, line)
     if m is not None:
         coprocessingtime = float(m.group("coprocessingtime"))
