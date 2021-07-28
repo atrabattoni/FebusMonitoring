@@ -5,11 +5,17 @@ from . import parser
 
 class Watcher():
 
-    def __init__(self, info_fname, lines_fname):
+    def __init__(self, server, info_fname, lines_fname):
+        self.server = server
         self.info_fname = info_fname
         self.lines_fname = lines_fname
         self.info = {}
         self.lines = []
+
+    def run(self):
+        while True:
+            line = self.server.stdout.readline()
+            self.parse(line)
 
     def parse(self, line):
         if parser.parse_new_loop(line):
