@@ -77,12 +77,12 @@ class FileWatcher:
 
     def __init__(self):
         self.directory = pathlib.Path(".")
-        self.files = self.directory.glob("*.h5")
+        self.files = list(self.directory.glob("*.h5"))
         self.currentfile = None
         self.newfile = None
 
     def watch(self):
-        files = self.directory.glob("*.h5")
+        files = list(self.directory.glob("*.h5"))
         newfiles = [file for file in files if file not in self.files]
         self.files.extend(newfiles)
         print(list(newfiles))
