@@ -16,14 +16,31 @@ class Watcher():
             self.dump_info()
             self.dump_lines()
 
-        self.info["gpstime"], self.info["pulseid"] = (
-            parser.parse_gpstime_pulseid(line))
-        self.info["walltime"] = parser.parse_walltime(line)
-        self.info["trigid"] = parser.parse_trigid(line)
-        self.info["utcdatetime"], self.info["blockid"] = (
-            parser.parse_utcdatetime_blockid(line))
-        self.info["writetime"] = parser.parse_writetime(line)
-        self.info["coprocessingtime"] = parser.parse_coprocessingtime(line)
+        gpstime, pulseid = parser.parse_gpstime_pulseid(line)
+        if (gpstime is not None) and (pulseid is not None):
+            self.info["gpstime"] = gpstime
+            self.info["pulseid"] = pulseid
+
+        walltime = parser.parse_walltime(line)
+        if walltime is not None:
+            self.info["walltime"] = walltime
+
+        trigid = parser.parse_trigid(line)
+        if trigid is not None:
+            self.info["trigid"] = trigid
+
+        utcdatetime, blockid = parser.parse_utcdatetime_blockid(line)
+        if (utcdatetime is not None) and (blockid is not None):
+            self.info["utcdatetime"] = utcdatetime
+            self.info["blockid"] = blockid
+
+        writetime = parser.parse_writetime(line)
+        if writetime is not None:
+            self.info["writetime"] = writetime
+
+        coprocessingtime = parser.parse_coprocessingtime(line)
+        if coprocessingtime is not None:
+            self.info["coprocessingtime"] = coprocessingtime
 
         self.lines.append(line)
 
@@ -31,7 +48,7 @@ class Watcher():
         with open(self.info_fname, "w") as file:
             for key, item in self.info.items():
                 file.write(f"{key}: {item}\n")
-        self.info = {}
+                self.info[key] = None
 
     def dump_lines(self):
         with open(self.lines_fname, "w") as file:
