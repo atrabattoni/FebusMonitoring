@@ -23,7 +23,7 @@ def parse_walltime(line):
     pattern = r"\[SERVER\] cuda block wall clock (?P<walltime>\d+\.\d+)"
     m = re.match(pattern, line)
     if m is not None:
-        walltime = float(m.group("walltime"))
+        walltime = round(float(m.group("walltime")), 3)
         return walltime
     else:
         return None
@@ -34,7 +34,7 @@ def parse_gpstime_pulseid(line):
     pattern = r"CoProcess ref pulseID: (?P<pulseid>\d+) timestamp:(?P<timestamp>\d+)"
     m = re.match(pattern, line)
     if m is not None:
-        timestamp = float(m.group("timestamp"))
+        timestamp = round(float(m.group("timestamp")), 3)
         gpstime = datetime.datetime.utcfromtimestamp(timestamp)
         pulseid = int(m.group("pulseid"))
         return gpstime, pulseid
@@ -58,7 +58,7 @@ def parse_utcdatetime_blockid(line):
     pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) \d+\.\d+ \|realtime: (?P<timestamp>\d+\.\d+)\| \d+\.\d+ -?\d+\.\d+"
     m = re.match(pattern, line)
     if m is not None:
-        timestamp = float(m.group("timestamp"))
+        timestamp = round(float(m.group("timestamp")), 3)
         utcdatetime = datetime.datetime.utcfromtimestamp(timestamp)
         blockid = int(m.group("blockid"))
         return utcdatetime, blockid
@@ -71,7 +71,7 @@ def parse_writetime(line):
     pattern = r"\[HDF5Writer\]\[Info\] Writing data took (?P<writetime>\d+\.\d+) ms"
     m = re.match(pattern, line)
     if m is not None:
-        writetime = float(m.group("writetime")) / 1000
+        writetime = round(float(m.group("writetime")) / 1000, 3)
         return writetime
     else:
         return None
