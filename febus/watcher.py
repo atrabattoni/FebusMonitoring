@@ -85,12 +85,11 @@ class FileWatcher:
         files = list(self.directory.glob("*.h5"))
         newfiles = [file for file in files if file not in self.files]
         self.files.extend(newfiles)
-        print(list(newfiles))
         if len(newfiles) == 1:
-            self.currentfile = self.newfile
             self.newfile, = newfiles
+            self.currentfile = self.newfile
+            print(self.currentfile)
+            print(self.newfile)
+            print()
         else:
             self.newfile = None
-        print(self.currentfile)
-        print(self.newfile)
-        print()
