@@ -35,9 +35,9 @@ class StateUpdater():
             self.info["gpstime"] = gpstime
             self.info["pulseid"] = pulseid
 
-        wall_time = parser.parse_wall_time(line)
-        if wall_time is not None:
-            self.info["wall_time"] = wall_time
+        walltime = parser.parse_walltime(line)
+        if walltime is not None:
+            self.info["walltime"] = walltime
 
         trigid = parser.parse_trigid(line)
         if trigid is not None:
@@ -48,13 +48,13 @@ class StateUpdater():
             self.info["utcdatetime"] = utcdatetime
             self.info["blockid"] = blockid
 
-        write_time = parser.parse_write_time(line)
-        if write_time is not None:
-            self.info["write_time"] = write_time
+        writetime = parser.parse_writetime(line)
+        if writetime is not None:
+            self.info["writetime"] = writetime
 
-        coprocessing_time = parser.parse_coprocessing_time(line)
-        if coprocessing_time is not None:
-            self.info["coprocessing_time"] = coprocessing_time
+        coprocessingtime = parser.parse_coprocessingtime(line)
+        if coprocessingtime is not None:
+            self.info["coprocessingtime"] = coprocessingtime
 
     def dump(self):
         with open(self.fname, "w") as file:

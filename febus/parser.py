@@ -31,13 +31,13 @@ def parse_gpstime_pulseid(line):
         return None, None
 
 
-def parse_wall_time(line):
+def parse_walltime(line):
     """Get the loop wall time"""
-    pattern = r"\[SERVER\] cuda block wall clock (?P<wall_time>\d+\.\d+)"
+    pattern = r"\[SERVER\] cuda block wall clock (?P<walltime>\d+\.\d+)"
     m = re.match(pattern, line)
     if m is not None:
-        wall_time = float(m.group("wall_time"))
-        return wall_time
+        walltime = float(m.group("walltime"))
+        return walltime
     else:
         return None
 
@@ -47,7 +47,7 @@ def parse_trigid(line):
     pattern = r"CoProcess trigid: (?P<trigid>\d+)"
     m = re.match(pattern, line)
     if m is not None:
-        trigid = float(m.group("trigid"))
+        trigid = int(m.group("trigid"))
         return trigid
     else:
         return None
@@ -66,23 +66,23 @@ def parse_utcdatetime_blockid(line):
         return None, None
 
 
-def parse_write_time(line):
+def parse_writetime(line):
     """Get the block write time"""
-    pattern = r"[HDF5Writer][Info] Writing data took (?P<write_time>\d+\.\d+) ms"
+    pattern = r"\[HDF5Writer\]\[Info\] Writing data took (?P<writetime>\d+\.\d+) ms"
     m = re.match(pattern, line)
     if m is not None:
-        write_time = float(m.group("write_time"))
-        return write_time
+        writetime = float(m.group("writetime"))
+        return writetime
     else:
         return None
 
 
-def parse_coprocessing_time(line):
+def parse_coprocessingtime(line):
     """Get the block write time"""
-    pattern = r"###Coprocessing took (?P<coprocessing_time>\d+\.\d+) (seconds)"
+    pattern = r"###Coprocessing took (?P<coprocessingtime>\d+\.\d+) \(seconds\)"
     m = re.match(pattern, line)
     if m is not None:
-        coprocessing_time = float(m.group("coprocessing_time"))
-        return coprocessing_time
+        coprocessingtime = float(m.group("coprocessingtime"))
+        return coprocessingtime
     else:
         return None
