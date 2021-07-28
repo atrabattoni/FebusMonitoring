@@ -6,8 +6,7 @@ from . import parser
 
 class TerminalWatcher():
 
-    def __init__(self, server, callbacks, info_fname, lines_fname):
-        self.server = server
+    def __init__(self, callbacks, info_fname, lines_fname):
         self.callbacks = callbacks
         self.info_fname = info_fname
         self.lines_fname = lines_fname

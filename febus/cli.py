@@ -22,34 +22,6 @@ ENV[KEY] = ENV[KEY] + VALUE
 STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
 
 
-def launch(gps=True):
-    """Launch a Catalyst Server that can be terminated with CTRL+C"""
-    cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
-    if gps:
-        cmd.append("gps")
-    server = subprocess.Popen(
-        cmd,
-        bufsize=1,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    server.stdout.reconfigure(line_buffering=True, write_through=True)
-    time.sleep(1)
-    print("Server Launched")
-
-    original_handler = getsignal(SIGINT)
-
-    def handler(signal_received, frame):
-        server.terminate()
-        print("\nServer Terminated")
-        signal(SIGINT, original_handler)
-        raise KeyboardInterrupt
-
-    signal(SIGINT, handler)
-    return server
-
-
 def start(fiber_length, frequency_resolution, spatial_resolution,
           ampli_power, cutoff_frequency, gauge_length,
           sampling_resolution, pipeline_fname):
