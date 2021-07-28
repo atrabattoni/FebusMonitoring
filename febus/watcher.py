@@ -6,8 +6,9 @@ from . import parser
 
 class TerminalWatcher():
 
-    def __init__(self, server, info_fname, lines_fname):
+    def __init__(self, server, callbacks, info_fname, lines_fname):
         self.server = server
+        self.callbacks = callbacks
         self.info_fname = info_fname
         self.lines_fname = lines_fname
         self.info = {}
@@ -21,6 +22,8 @@ class TerminalWatcher():
                 error = False
             self.dump_info(error=error)
             self.dump_lines(error=error)
+            for callback in self.callbacks:
+                callback.watch()
 
         gpstime, pulseid = parser.parse_gpstime_pulseid(line)
         if (gpstime is not None) and (pulseid is not None):
