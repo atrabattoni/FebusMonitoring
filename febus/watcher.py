@@ -1,4 +1,4 @@
-import time
+import datetime
 
 from . import parser
 
@@ -13,8 +13,12 @@ class Watcher():
 
     def parse(self, line):
         if parser.parse_new_loop(line):
-            self.dump_info()
-            self.dump_lines()
+            if None in self.info:
+                error = True
+            else:
+                error = False
+            self.dump_info(error=error)
+            self.dump_lines(error=error)
 
         gpstime, pulseid = parser.parse_gpstime_pulseid(line)
         if (gpstime is not None) and (pulseid is not None):
@@ -44,13 +48,21 @@ class Watcher():
 
         self.lines.append(line)
 
-    def dump_info(self):
-        with open(self.info_fname, "w") as file:
+    def dump_info(self, error=False):
+        fname = self.info_fname
+        if error:
+            now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            fname.append(f"_error_{now}")
+        with open(fname, "w") as file:
             for key, item in self.info.items():
                 file.write(f"{key}: {item}\n")
                 self.info[key] = None
 
-    def dump_lines(self):
-        with open(self.lines_fname, "w") as file:
+    def dump_lines(self, error=False):
+        fname = self.lines_fname
+        if error:
+            now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            fname.append(f"_error_{now}")
+        with open(fname, "w") as file:
             file.writelines(self.lines)
         self.lines = []
