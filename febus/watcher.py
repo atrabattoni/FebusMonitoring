@@ -11,9 +11,7 @@ class Watcher():
         self.directory = pathlib.Path(".")
         self.files = list(self.directory.glob("*.h5"))
         self.info = {}
-        self.info_fname = "info"
         self.lines = []
-        self.lines_fname = "lines"
         self.newfile = None
 
     def parse(self, line):
@@ -24,7 +22,7 @@ class Watcher():
                 error = False
             self.dump_info(error=error)
             self.dump_lines(error=error)
-
+            self.log_info()
 
         gpstime, pulseid = parser.parse_gpstime_pulseid(line)
         if (gpstime is not None) and (pulseid is not None):
@@ -57,7 +55,7 @@ class Watcher():
         self.lines.append(line)
 
     def dump_info(self, error=False):
-        fname = self.info_fname
+        fname = "info"
         if error:
             now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
             fname += f"_error_{now}"
@@ -67,7 +65,7 @@ class Watcher():
                 self.info[key] = None
 
     def dump_lines(self, error=False):
-        fname = self.lines_fname
+        fname = "stream"
         if error:
             now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
             fname += f"_error_{now}"
@@ -84,3 +82,14 @@ class Watcher():
             self.currentfile = self.newfile
         else:
             self.newfile = None
+
+    def log_info(self):
+        fname = str(self.currentfile).replace("h5", "log")
+        sep = ","
+        with open(fname, "a") as file:
+            lines = []
+            if self.newfile is not None:
+                lines.append(sep.join(self.info.keys()) + "\n")
+            values = [str(value) for value in self.info.values()]
+            lines.append(sep.join(values) + "\n")
+            file.writelines(lines)
