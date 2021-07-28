@@ -52,7 +52,7 @@ class Watcher():
         fname = self.info_fname
         if error:
             now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            fname.append(f"_error_{now}")
+            fname += f"_error_{now}"
         with open(fname, "w") as file:
             for key, item in self.info.items():
                 file.write(f"{key}: {item}\n")
@@ -62,7 +62,7 @@ class Watcher():
         fname = self.lines_fname
         if error:
             now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            fname.append(f"_error_{now}")
+            fname += f"_error_{now}"
         with open(fname, "w") as file:
             file.writelines(self.lines)
         self.lines = []
