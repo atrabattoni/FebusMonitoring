@@ -84,6 +84,7 @@ class FileWatcher:
     def watch(self):
         files = self.directory.glob("*.h5")
         newfiles = [file for file in files if file not in self.files]
+        print(list(newfiles))
         self.files = files
         if len(newfiles) == 1:
             self.currentfile = self.newfile
