@@ -55,7 +55,7 @@ def parse_trigid(line):
 
 def parse_utcdatetime_blockid(line):
     """Get the UTC datetime and ID of each block"""
-    pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) \d+\.\d+ \|realtime: (?P<timestamp>\d+\./d+)\| \d+\.\d+ \d+\.\d+"
+    pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) \d+\.\d+ \|realtime: (?P<timestamp>\d+\.\d+)\| \d+\.\d+ \d+\.\d+"
     m = re.match(pattern, line)
     if m is not None:
         timestamp = float(m.group("timestamp"))
