@@ -3,60 +3,36 @@ import time
 from . import parser
 
 
-class RawStateUpdater():
+class Watcher():
 
-    def __init__(self, fname):
-        self.fname = fname
-        self.lines = []
-
-    def parse(self, line):
-        if parser.parse_new_loop(line):
-            self.dump()
-        self.lines += line
-
-    def dump(self):
-        with open(self.fname, "w") as file:
-            file.writelines(self.lines)
-        self.lines = []
-
-
-class StateUpdater():
-
-    def __init__(self, fname):
-        self.fname = fname
+    def __init__(self, info_fname, lines_fname):
+        self.info_fname = info_fname
+        self.lines_fname = lines_fname
         self.info = {}
+        self.lines = []
 
     def parse(self, line):
         if parser.parse_new_loop(line):
-            self.dump()
+            self.dump_info()
+            self.info = {}
+            self.dump_lines()
+            self.lines += line
 
-        gpstime, pulseid = parser.parse_gpstime_pulseid(line)
-        if (gpstime is not None) and (pulseid is not None):
-            self.info["gpstime"] = gpstime
-            self.info["pulseid"] = pulseid
+        self.info["gpstime"], self.info["pulseid"] = (
+            parser.parse_gpstime_pulseid(line))
+        self.info["walltime"] = parser.parse_walltime(line)
+        self.info["trigid"] = parser.parse_trigid(line)
+        self.info["utcdatetime"], self.info["blockid"] = (
+            parser.parse_utcdatetime_blockid(line))
+        self.info["writetime"] = parser.parse_writetime(line)
+        self.info["coprocessingtime"] = parser.parse_coprocessingtime(line)
 
-        walltime = parser.parse_walltime(line)
-        if walltime is not None:
-            self.info["walltime"] = walltime
-
-        trigid = parser.parse_trigid(line)
-        if trigid is not None:
-            self.info["trigid"] = trigid
-
-        utcdatetime, blockid = parser.parse_utcdatetime_blockid(line)
-        if (utcdatetime is not None) and (blockid is not None):
-            self.info["utcdatetime"] = utcdatetime
-            self.info["blockid"] = blockid
-
-        writetime = parser.parse_writetime(line)
-        if writetime is not None:
-            self.info["writetime"] = writetime
-
-        coprocessingtime = parser.parse_coprocessingtime(line)
-        if coprocessingtime is not None:
-            self.info["coprocessingtime"] = coprocessingtime
-
-    def dump(self):
-        with open(self.fname, "w") as file:
+    def dump_info(self):
+        with open(self.info_fname, "w") as file:
             for key, item in self.info.items():
                 file.write(f"{key}: {item}\n")
+
+    def dump_lines(self):
+        with open(self.lines_fname, "w") as file:
+            file.writelines(self.lines)
+        self.lines = []
