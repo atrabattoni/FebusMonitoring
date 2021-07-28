@@ -82,7 +82,7 @@ def parse_coprocessingtime(line):
     pattern = r"###Coprocessing took (?P<coprocessingtime>\d+\.\d+) \(seconds\)"
     m = re.match(pattern, line)
     if m is not None:
-        coprocessingtime = float(m.group("coprocessingtime"))
+        coprocessingtime = round(float(m.group("coprocessingtime")), 3)
         return coprocessingtime
     else:
         return None
