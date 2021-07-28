@@ -77,7 +77,7 @@ class FileWatcher:
 
     def __init__(self):
         self.directory = pathlib.Path(".")
-        self.files = []
+        self.files = self.directory.glob("*.h5")
         self.currentfile = None
         self.newfile = None
 
@@ -88,6 +88,8 @@ class FileWatcher:
         if len(newfiles) == 1:
             self.currentfile = self.newfile
             self.newfile, = newfiles
-            print(self.newfile)
         else:
             self.newfile = None
+        print(self.currentfile)
+        print(self.newfile)
+        print()
