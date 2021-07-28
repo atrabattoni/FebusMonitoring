@@ -1,9 +1,10 @@
 import datetime
+import pathlib
 
 from . import parser
 
 
-class Watcher():
+class TerminalWatcher():
 
     def __init__(self, server, info_fname, lines_fname):
         self.server = server
@@ -11,11 +12,6 @@ class Watcher():
         self.lines_fname = lines_fname
         self.info = {}
         self.lines = []
-
-    def run(self):
-        while True:
-            line = self.server.stdout.readline()
-            self.parse(line)
 
     def parse(self, line):
         if parser.parse_new_loop(line):
@@ -72,3 +68,21 @@ class Watcher():
         with open(fname, "w") as file:
             file.writelines(self.lines)
         self.lines = []
+
+
+class FileWatcher:
+
+    def __init__(self):
+        self.directory = pathlib.Path(".")
+        self.files = []
+        self.currentfile = None
+        self.newfile = None
+
+    def watch(self):
+        files = self.directory.glob("*.h5")
+        newfiles = [file for file in files if file not in self.files]
+        if len(newfiles) == 1:
+            self.currentfile = self.newfile
+            self.newfile, = newfiles
+        else:
+            self.newfile = None

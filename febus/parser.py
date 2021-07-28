@@ -71,7 +71,7 @@ def parse_writetime(line):
     pattern = r"\[HDF5Writer\]\[Info\] Writing data took (?P<writetime>\d+\.\d+) ms"
     m = re.match(pattern, line)
     if m is not None:
-        writetime = float(m.group("writetime"))
+        writetime = float(m.group("writetime")) / 1000
         return writetime
     else:
         return None
