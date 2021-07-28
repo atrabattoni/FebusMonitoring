@@ -18,19 +18,6 @@ def parse_new_loop(line):
     return line == "New loop \n"
 
 
-def parse_gpstime_pulseid(line):
-    """Get the GPS time information and corresponding pulse ID"""
-    pattern = r"GENEPULSE Sending TimeStamp:(?P<timestamp>\d+).+PulseID:(?P<pulseid>\d+)"
-    m = re.match(pattern, line)
-    if m is not None:
-        timestamp = float(m.group("timestamp"))
-        gpstime = datetime.datetime.utcfromtimestamp(timestamp)
-        pulseid = int(m.group("pulseid"))
-        return gpstime, pulseid
-    else:
-        return None, None
-
-
 def parse_walltime(line):
     """Get the loop wall time"""
     pattern = r"\[SERVER\] cuda block wall clock (?P<walltime>\d+\.\d+)"
@@ -40,6 +27,19 @@ def parse_walltime(line):
         return walltime
     else:
         return None
+
+
+def parse_gpstime_pulseid(line):
+    """Get the GPS time information and corresponding pulse ID"""
+    pattern = r"CoProcess ref pulseID: (?P<pulseid>\d+) timestamp:(?P<timestamp>\d+)"
+    m = re.match(pattern, line)
+    if m is not None:
+        timestamp = float(m.group("timestamp"))
+        gpstime = datetime.datetime.utcfromtimestamp(timestamp)
+        pulseid = int(m.group("pulseid"))
+        return gpstime, pulseid
+    else:
+        return None, None
 
 
 def parse_trigid(line):
@@ -55,7 +55,7 @@ def parse_trigid(line):
 
 def parse_utcdatetime_blockid(line):
     """Get the UTC datetime and ID of each block"""
-    pattern = r"\[CATALYST\] Calling pipeline on block (?P<timestamp>\d+)\.\d+ (?P<blockid>\d+)"
+    pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) \d+\.\d+ \|realtime: (?P<timestamp>\d+\./d+)\| \d+\.\d+ \d+\.\d+"
     m = re.match(pattern, line)
     if m is not None:
         timestamp = float(m.group("timestamp"))
