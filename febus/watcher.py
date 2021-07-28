@@ -88,5 +88,6 @@ class FileWatcher:
         if len(newfiles) == 1:
             self.currentfile = self.newfile
             self.newfile, = newfiles
+            print(self.newfile)
         else:
             self.newfile = None
