@@ -2,6 +2,7 @@ import datetime
 import pathlib
 
 from . import parser
+from . import cli
 
 
 class Watcher():
@@ -42,6 +43,12 @@ class Watcher():
             self.info["blockid"] = blockid
             self.info["blocktime"] = blocktime
             self.info["realtime"] = realtime
+
+            # Solve 3236 Error
+            if blocktime > datetime.datetime(3000, 1, 1):
+                cli.disable()
+            else:
+                cli.enable()
 
         writingtime = parser.parse_writing(line)
         if writingtime is not None:
