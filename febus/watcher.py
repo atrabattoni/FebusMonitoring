@@ -123,6 +123,6 @@ def process(fname):
     xarr = daspy.io.read(fname)
     xarr = daspy.io.trim(xarr)
     xarr.to_netcdf(drive / fname.with_suffix(".nc"))
-    os.rename(fname.with_suffic(".log"), drive / fname.with_suffic(".log"))
+    os.rename(fname.with_suffic(".log"), drive / fname.with_suffix(".log"))
     os.remove(fname)
     print("Done.")
