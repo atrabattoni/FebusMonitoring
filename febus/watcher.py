@@ -2,7 +2,7 @@ import datetime
 import os
 import pathlib
 import shutil
-import threading
+import multiprocessing
 
 import daspy.io
 
@@ -63,6 +63,7 @@ class Watcher():
             self.info["writingtime"] = writingtime
             self.watch_files()
             self.info["currentfile"] = self.currentfile
+            self.info["currentsize"] = self.currentfile.stat().st_size
 
         coprocessingtime = parser.parse_coprocessing(line)
         if coprocessingtime is not None:
@@ -98,7 +99,8 @@ class Watcher():
 
             # Process old file
             if self.currentfile is not None:
-                th = threading.Thread(target=process, args=(self.currentfile,))
+                th = multiprocessing.Process(
+                    target=process, args=(self.currentfile,))
                 th.start()
 
             self.currentfile = self.newfile
@@ -119,6 +121,7 @@ class Watcher():
 
 
 def process(fname):
+    os.nice(19)
     drive = pathlib.Path("/run/media/febus/Elements")
     print(f"Processing: {fname}... ", end="")
     xarr = daspy.io.read(fname)
