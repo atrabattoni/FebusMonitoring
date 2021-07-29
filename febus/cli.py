@@ -43,6 +43,7 @@ class FebusDevice:
         self.server.terminate()
         print("Server Terminated")
 
+    @staticmethod
     def start_acquisition(fiber_length, frequency_resolution, spatial_resolution,
                           ampli_power, cutoff_frequency, gauge_length,
                           sampling_resolution, pipeline_fname):
@@ -63,24 +64,29 @@ class FebusDevice:
             env=ENV,
         )
 
+    @staticmethod
     def stop_acquisition():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "stop"]
         subprocess.call(cmd, env=ENV)
 
+    @staticmethod
     def get_status():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "get-status"]
         out = subprocess.check_output(cmd, env=ENV)
         return out.splitlines()[1]
 
+    @staticmethod
     def get_params():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "get-params"]
         out = subprocess.check_output(cmd, env=ENV)
         return out.splitlines()[1:]
 
+    @staticmethod
     def enable_writings():
         cmd = ["rm", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
 
+    @staticmethod
     def disable_writings():
         cmd = ["touch", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
