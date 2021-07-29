@@ -20,7 +20,7 @@ class Watcher():
                 error = True
             else:
                 error = False
-            self.log_info()
+            self.log_info(error=error)
             self.dump_info(error=error)
             self.dump_lines(error=error)
 
@@ -84,8 +84,10 @@ class Watcher():
         else:
             self.newfile = None
 
-    def log_info(self):
-        fname = str(self.currentfile).replace("h5", "log")
+    def log_info(self, error=False):
+        fname = str(self.currentfile).replace(".h5", ".log")
+        if error:
+            fname.replace(".log", "_error.log")
         sep = ","
         with open(fname, "a") as file:
             if self.newfile is not None:
