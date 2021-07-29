@@ -34,9 +34,9 @@ def parse_pulse(line):
     pattern = r"CoProcess ref pulseID: (?P<pulseid>\d+) timestamp:(?P<pulsetime>\d+)"
     m = re.match(pattern, line)
     if m is not None:
-        pulsetime = m.group("pulsetime")
-        pulsetime = datetime.datetime.utcfromtimestamp(pulsetime)
         pulseid = int(m.group("pulseid"))
+        pulsetime = int(m.group("pulsetime"))
+        pulsetime = datetime.datetime.utcfromtimestamp(pulsetime)
         return pulseid, pulsetime
     else:
         return None, None
@@ -58,11 +58,11 @@ def parse_block(line):
     pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) (?P<blocktime>\d*\.?\d*) \|realtime: (?P<realtime>\d*\.?\d*)\| \d*\.?\d* -?\d*\.?\d*"
     m = re.match(pattern, line)
     if m is not None:
+        blockid = int(m.group("blockid"))
         blocktime = float(m.group("blocktime"))
         realtime = float(m.group("realtime"))
         blocktime = datetime.datetime.utcfromtimestamp(blocktime)
         realtime = datetime.datetime.utcfromtimestamp(realtime)
-        blockid = int(m.group("blockid"))
         return blockid, blocktime, realtime
     else:
         return None, None, None
