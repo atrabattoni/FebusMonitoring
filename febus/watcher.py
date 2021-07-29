@@ -117,6 +117,8 @@ class Watcher():
 
 
 def process(fname):
+    print(f"Processing: {fname}")
     xarr = daspy.io.read(fname)
     xarr = daspy.io.trim(xarr)
     xarr.to_netcdf(fname.with_suffix(".nc"))
+    print("Done")
