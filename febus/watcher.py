@@ -1,4 +1,5 @@
 import datetime
+import os
 import pathlib
 import threading
 
@@ -122,4 +123,6 @@ def process(fname):
     xarr = daspy.io.read(fname)
     xarr = daspy.io.trim(xarr)
     xarr.to_netcdf(drive / fname.with_suffix(".nc"))
+    os.rename(fname.with_suffic(".log"), drive / fname.with_suffic(".log"))
+    os.remove(fname)
     print("Done.")
