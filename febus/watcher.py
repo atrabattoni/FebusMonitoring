@@ -1,6 +1,7 @@
 import datetime
 import os
 import pathlib
+import shutil
 import threading
 
 import daspy.io
@@ -123,6 +124,6 @@ def process(fname):
     xarr = daspy.io.read(fname)
     xarr = daspy.io.trim(xarr)
     xarr.to_netcdf(drive / fname.with_suffix(".nc"))
-    os.rename(fname.with_suffix(".log"), drive / fname.with_suffix(".log"))
+    shutil.move(fname.with_suffix(".log"), drive / fname.with_suffix(".log"))
     os.remove(fname)
     print("Done.")
