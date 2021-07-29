@@ -83,7 +83,7 @@ class FebusDevice:
 
     @staticmethod
     def enable_writings():
-        cmd = ["rm", STOP_WRITINGS_PATH]
+        cmd = ["rm -f", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
 
     @staticmethod
