@@ -16,6 +16,7 @@ class Watcher():
         self.info = {}
         self.lines = []
         self.newfile = None
+        self.temporary_disabled = False
 
     def parse(self, line):
         if parser.parse_newloop(line):
@@ -49,8 +50,11 @@ class Watcher():
             # Solve 3236 Error
             if blocktime > datetime.datetime(3000, 1, 1):
                 cli.disable()
+                self.temporary_disabled = True
             else:
-                cli.enable()
+                if self.temporary_disabled:
+                    cli.enable()
+                    self.temporary_disabled = False
 
         writingtime = parser.parse_writing(line)
         if writingtime is not None:
