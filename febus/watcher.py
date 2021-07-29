@@ -1,8 +1,10 @@
 import datetime
 import pathlib
+import threading
 
-from . import parser
-from . import cli
+import daspy.io
+
+from . import cli, parser
 
 
 class Watcher():
@@ -87,7 +89,13 @@ class Watcher():
         self.files.extend(newfiles)
         if len(newfiles) == 1:
             self.newfile, = newfiles
+
+            # Process old file
+            th = threading.Thread(target=process, args=(self.currentfile))
+            th.start()
+            
             self.currentfile = self.newfile
+
         else:
             self.newfile = None
 
@@ -101,3 +109,10 @@ class Watcher():
                 file.write(sep.join(self.info.keys()) + "\n")
             values = [str(value) for value in self.info.values()]
             file.write(sep.join(values) + "\n")
+
+
+def process(fname):
+    xarr = daspy.io.read(fname)
+    xarr = daspy.io.trim(fname)
+    fname = fname.replace(".h5", ".nc")
+    xarr.to_netcdf(fname)
