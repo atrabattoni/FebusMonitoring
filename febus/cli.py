@@ -3,10 +3,11 @@ Python wrappers to Febus CLI tools. Lauching the server withing python allows
 to get the output of the terminal for further parsing. 
 """
 
+import atexit
 import os
 import subprocess
 import time
-from signal import SIGINT, signal, getsignal
+from signal import SIGINT, getsignal, signal
 
 # Set environment for ClientCli
 KEY = "LD_LIBRARY_PATH"
@@ -38,6 +39,7 @@ def launch(gps=True):
     time.sleep(1)
     print("Server Launched")
 
+    # terminate server on CTRL+C
     original_handler = getsignal(SIGINT)
 
     def handler(signal_received, frame):
@@ -45,8 +47,11 @@ def launch(gps=True):
         print("\nServer Terminated")
         signal(SIGINT, original_handler)
         raise KeyboardInterrupt
-
     signal(SIGINT, handler)
+
+    # terminate server at exit
+    atexit.register(server.terminate)
+
     return server
 
 
