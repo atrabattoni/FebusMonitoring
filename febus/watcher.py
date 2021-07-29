@@ -76,7 +76,7 @@ class Watcher:
         self.oldfiles.extend(newfiles)
         if len(newfiles) == 1:
             newfile, = newfiles
-            self.newfile = True
+            self.isnewfile = True
 
             # Process old file
             if (self.data_processor is not None) and (self.currentfile is not None):
@@ -98,7 +98,7 @@ class Watcher:
             fname = fname.replace(".log", "_error.log")
         sep = ","
         with open(fname, "a") as file:
-            if self.newfile is not None:
+            if self.isnewfile is not None:
                 file.write(sep.join(self.info.keys()) + "\n")
             values = [str(value) for value in self.info.values()]
             file.write(sep.join(values) + "\n")
