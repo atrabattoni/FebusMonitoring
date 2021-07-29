@@ -1,10 +1,8 @@
 import datetime
-from examples.watcher import data_processor
+import multiprocessing
 import os
 import pathlib
-import multiprocessing
 import threading
-
 
 from . import parser
 
