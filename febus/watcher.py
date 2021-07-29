@@ -15,7 +15,7 @@ class Watcher():
         self.newfile = None
 
     def parse(self, line):
-        if parser.parse_new_loop(line):
+        if parser.parse_newloop(line):
             if None in self.info.values():
                 error = True
             else:
@@ -24,31 +24,32 @@ class Watcher():
             self.dump_info(error=error)
             self.dump_lines(error=error)
 
-        gpstime, pulseid = parser.parse_gpstime_pulseid(line)
-        if (gpstime is not None) and (pulseid is not None):
-            self.info["gpstime"] = gpstime
+        pulseid, pulsetime = parser.parse_pulse(line)
+        if (pulsetime is not None) and (pulseid is not None):
             self.info["pulseid"] = pulseid
+            self.info["pulsetime"] = pulsetime
 
         walltime = parser.parse_walltime(line)
         if walltime is not None:
             self.info["walltime"] = walltime
 
-        trigid = parser.parse_trigid(line)
+        trigid = parser.parse_trigger(line)
         if trigid is not None:
             self.info["trigid"] = trigid
 
-        utcdatetime, blockid = parser.parse_utcdatetime_blockid(line)
-        if (utcdatetime is not None) and (blockid is not None):
-            self.info["utcdatetime"] = utcdatetime
+        blockid, blocktime, realtime = parser.parse_block(line)
+        if (blockid is not None) and (blocktime is not None) and (realtime is not None):
             self.info["blockid"] = blockid
+            self.info["blocktime"] = blocktime
+            self.info["realtime"] = realtime
 
-        writetime = parser.parse_writetime(line)
-        if writetime is not None:
-            self.info["writetime"] = writetime
+        writingtime = parser.parse_writing(line)
+        if writingtime is not None:
+            self.info["writingtime"] = writingtime
             self.watch_files()
             self.info["currentfile"] = self.currentfile
 
-        coprocessingtime = parser.parse_coprocessingtime(line)
+        coprocessingtime = parser.parse_coprocessing(line)
         if coprocessingtime is not None:
             self.info["coprocessingtime"] = coprocessingtime
 

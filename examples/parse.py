@@ -3,7 +3,7 @@ Offline parsing of some terminal logs.
 """
 
 import datetime
-from febus.parser import parse_utcdatetime_block, parse_gpstime_pulseid
+from febus.parser import parse_blocktime_block, parse_pulsetime_pulseid
 
 fname = "path_to_log"  # to change by the user
 
@@ -14,21 +14,21 @@ line = True
 with open(fname, "r") as server:  # the file simulate the server
     while line:
         line = server.readline()
-        utcdatetime, blockid = parse_utcdatetime_block(line)
-        if utcdatetime and blockid:
-            if utcdatetime > datetime.datetime(3100, 1, 1):
+        blocktime, blockid = parse_blocktime_block(line)
+        if blocktime and blockid:
+            if blocktime > datetime.datetime(3100, 1, 1):
                 verbose = True
                 errorline = count
             if verbose:
-                print("Loop:", utcdatetime, blockid)
-        gpstime, pulseid = parse_gpstime_pulseid(line)
-        if gpstime and pulseid:
-            if gpstime > datetime.datetime(3100, 1, 1):
+                print("Loop:", blocktime, blockid)
+        pulsetime, pulseid = parse_pulsetime_pulseid(line)
+        if pulsetime and pulseid:
+            if pulsetime > datetime.datetime(3100, 1, 1):
                 verbose = True
                 errorline = count
             if verbose:
                 print()
-                print("GPS:", gpstime, pulseid)
+                print("GPS:", pulsetime, pulseid)
                 print()
         count += 1
         if verbose and count - errorline > 1000:
