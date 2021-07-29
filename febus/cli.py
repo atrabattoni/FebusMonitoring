@@ -42,15 +42,18 @@ def launch(gps=True):
     # terminate server on CTRL+C
     original_handler = getsignal(SIGINT)
 
-    def handler(signal_received, frame):
+    def terminate():
         server.terminate()
         print("\nServer Terminated")
+
+    def handler(signal_received, frame):
+        terminate()
         signal(SIGINT, original_handler)
         raise KeyboardInterrupt
     signal(SIGINT, handler)
 
     # terminate server at exit
-    atexit.register(server.terminate)
+    atexit.register(terminate)
 
     return server
 
