@@ -87,7 +87,7 @@ class Watcher():
     def log_info(self, error=False):
         fname = str(self.currentfile).replace(".h5", ".log")
         if error:
-            fname.replace(".log", "_error.log")
+            fname = fname.replace(".log", "_error.log")
         sep = ","
         with open(fname, "a") as file:
             if self.newfile is not None:
