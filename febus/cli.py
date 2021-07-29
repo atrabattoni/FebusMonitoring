@@ -1,13 +1,7 @@
-"""
-Python wrappers to Febus CLI tools. Lauching the server withing python allows
-to get the output of the terminal for further parsing. 
-"""
-
 import atexit
 import os
 import subprocess
 import time
-from signal import SIGINT, getsignal, signal
 
 # Set environment for ClientCli
 KEY = "LD_LIBRARY_PATH"
@@ -23,109 +17,70 @@ ENV[KEY] = ENV[KEY] + VALUE
 STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
 
 
-def launch(gps=True):
-    """Launch a Catalyst Server that can be terminated with CTRL+C"""
-    cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
-    if gps:
-        cmd.append("gps")
-    server = subprocess.Popen(
-        cmd,
-        bufsize=1,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    server.stdout.reconfigure(line_buffering=True, write_through=True)
-    time.sleep(1)
-    print("Server Launched")
+class FebusDevice:
 
-    # terminate server on CTRL+C
-    original_handler = getsignal(SIGINT)
-
-    def terminate():
-        server.terminate()
-        print("\nServer Terminated")
-
-    def handler(signal_received, frame):
-        terminate()
-        signal(SIGINT, original_handler)
-        raise KeyboardInterrupt
-    signal(SIGINT, handler)
-
-    # terminate server at exit
-    atexit.register(terminate)
-
-    return server
-
-
-def start(fiber_length, frequency_resolution, spatial_resolution,
-          ampli_power, cutoff_frequency, gauge_length,
-          sampling_resolution, pipeline_fname):
-    """Start Catalyst Server acquisition"""
-    subprocess.call(
-        [
-            "/opt/febus-a1/bin/ClientCli",
-            "-c",
-            "start",
-            "{:d}".format(fiber_length),  # m
-            "{:.1f}".format(frequency_resolution),  # Hz
-            "{:d}".format(spatial_resolution),  # m
-            "{:.1f}".format(ampli_power),  # dBm
-            "{:d}".format(cutoff_frequency),  # Hz
-            "{:d}".format(gauge_length),  # m
-            "{:d}".format(sampling_resolution),  # cm
-            pipeline_fname,
-        ],
-        env=ENV,
-    )
-
-
-def stop():
-    """Stop Catalyst Server acquisition"""
-    subprocess.call(
-        [
-            "/opt/febus-a1/bin/ClientCli",
-            "-c",
-            "stop",
-        ],
-        env=ENV,
-    )
-
-
-def get_status():
-    """Get Catalyst Server status"""
-    out = subprocess.check_output(
-        [
-            "/opt/febus-a1/bin/ClientCli",
-            "-c",
-            "get-status",
-        ],
-        env=ENV,
-    )
-    return out.splitlines()[1]
-
-
-def get_params():
-    """Get Catalyst Server status"""
-    out = subprocess.check_output(
-        [
-            "/opt/febus-a1/bin/ClientCli",
-            "-c",
-            "get-params",
-        ],
-        env=ENV
-    )
-    return out.splitlines()[1:]
-
-
-def enable():
-    """Enable HDF5 writing"""
-    try:
-        os.remove(STOP_WRITINGS_PATH)
-    except OSError:
+    def __init__(self):
         pass
 
+    def start_server(self, gps=False):
+        cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
+        if gps:
+            cmd.append("gps")
+        self.server = subprocess.Popen(
+            cmd,
+            bufsize=1,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        self.server.stdout.reconfigure(line_buffering=True, write_through=True)
+        self.server.gps = gps
+        atexit.register(self.terminate_server)
+        time.sleep(1)
+        print("Server Started")
 
-def disable():
-    """Disable HDF5 writing"""
-    open(STOP_WRITINGS_PATH, "a").close()
+    def terminate_server(self):
+        self.server.terminate()
+        print("Server Terminated")
+
+    def start_acquisition(fiber_length, frequency_resolution, spatial_resolution,
+                          ampli_power, cutoff_frequency, gauge_length,
+                          sampling_resolution, pipeline_fname):
+        subprocess.call(
+            [
+                "/opt/febus-a1/bin/ClientCli",
+                "-c",
+                "start",
+                "{:d}".format(fiber_length),  # m
+                "{:.1f}".format(frequency_resolution),  # Hz
+                "{:d}".format(spatial_resolution),  # m
+                "{:.1f}".format(ampli_power),  # dBm
+                "{:d}".format(cutoff_frequency),  # Hz
+                "{:d}".format(gauge_length),  # m
+                "{:d}".format(sampling_resolution),  # cm
+                pipeline_fname,
+            ],
+            env=ENV,
+        )
+
+    def stop_acquisition():
+        cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "stop"]
+        subprocess.call(cmd, env=ENV)
+
+    def get_status():
+        cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "get-status"]
+        out = subprocess.check_output(cmd, env=ENV)
+        return out.splitlines()[1]
+
+    def get_params():
+        cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "get-params"]
+        out = subprocess.check_output(cmd, env=ENV)
+        return out.splitlines()[1:]
+
+    def enable_writings():
+        cmd = ["rm", STOP_WRITINGS_PATH]
+        subprocess.call(cmd)
+
+    def disable_writings():
+        cmd = ["touch", STOP_WRITINGS_PATH]
+        subprocess.call(cmd)

@@ -1,60 +1,54 @@
-"""
-Functions to extract relevant information in the server logs.
-"""
-
 import datetime
 import re
 
 
+def parse(line):
+    parsers = [parse_newloop, parse_walltime, parse_pulse, parse_trigger,
+               parse_block, parse_writing, parse_coprocessing, parse_error]
+    for parser in parsers:
+        out = parser(line)
+        if out is not None:
+            return out
+
+
 def parse_error(line):
-    """Search for errors"""
     s = re.search(r"error", line, re.IGNORECASE)
     if s is not None:
-        return True
+        return "error"
 
 
 def parse_newloop(line):
-    """Find start of loop"""
-    return line == "New loop \n"
+    if line == "New loop \n":
+        return "newloop"
 
 
 def parse_walltime(line):
-    """Get the loop wall time"""
     pattern = r"\[SERVER\] cuda block wall clock (?P<walltime>\d*\.?\d*)"
     m = re.match(pattern, line)
     if m is not None:
         walltime = round(float(m.group("walltime")), 3)
-        return walltime
-    else:
-        return None
+        return {"walltime": walltime}
 
 
 def parse_pulse(line):
-    """Get the reference time information and corresponding pulse ID"""
     pattern = r"CoProcess ref pulseID: (?P<pulseid>\d+) timestamp:(?P<pulsetime>\d+)"
     m = re.match(pattern, line)
     if m is not None:
         pulseid = int(m.group("pulseid"))
         pulsetime = int(m.group("pulsetime"))
         pulsetime = datetime.datetime.utcfromtimestamp(pulsetime)
-        return pulseid, pulsetime
-    else:
-        return None, None
+        return {"pulseid": pulseid, "pulsetime": pulsetime}
 
 
 def parse_trigger(line):
-    """Get the trigger information"""
     pattern = r"CoProcess trigid: (?P<trigid>\d+)"
     m = re.match(pattern, line)
     if m is not None:
         trigid = int(m.group("trigid"))
-        return trigid
-    else:
-        return None
+        return {"trigid": trigid}
 
 
 def parse_block(line):
-    """Get the UTC datetime and ID of each block"""
     pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) (?P<blocktime>\d*\.?\d*) \|realtime: (?P<realtime>\d*\.?\d*)\| \d*\.?\d* -?\d*\.?\d*"
     m = re.match(pattern, line)
     if m is not None:
@@ -63,28 +57,20 @@ def parse_block(line):
         realtime = float(m.group("realtime"))
         blocktime = datetime.datetime.utcfromtimestamp(blocktime)
         realtime = datetime.datetime.utcfromtimestamp(realtime)
-        return blockid, blocktime, realtime
-    else:
-        return None, None, None
+        return {"blockid": blockid, "blocktime": blocktime, "realtime": realtime}
 
 
 def parse_writing(line):
-    """Get the block write time"""
     pattern = r"\[HDF5Writer\]\[Info\] Writing data took (?P<writingtime>\d*\.?\d*) ms"
     m = re.match(pattern, line)
     if m is not None:
         writingtime = round(float(m.group("writingtime")) / 1000, 3)
-        return writingtime
-    else:
-        return None
+        return {"writingtime": writingtime}
 
 
 def parse_coprocessing(line):
-    """Get the block write time"""
     pattern = r"###Coprocessing took (?P<coprocessingtime>\d*\.?\d*) \(seconds\)"
     m = re.match(pattern, line)
     if m is not None:
         coprocessingtime = round(float(m.group("coprocessingtime")), 3)
-        return coprocessingtime
-    else:
-        return None
+        return {"coprocessingtime": coprocessingtime}
