@@ -3,6 +3,7 @@ import os
 import pathlib
 import shutil
 import multiprocessing
+import warnings
 
 import daspy.io
 
@@ -122,11 +123,11 @@ class Watcher():
 
 def process(fname):
     os.nice(19)
+    warnings.filterwarnings("ignore")
     drive = pathlib.Path("/run/media/febus/Elements")
-    print(f"Processing: {fname}... ", end="")
     xarr = daspy.io.read(fname)
     xarr = daspy.io.trim(xarr)
     xarr.to_netcdf(drive / fname.with_suffix(".nc"))
     shutil.move(fname.with_suffix(".log"), drive / fname.with_suffix(".log"))
     os.remove(fname)
-    print("Done.")
+    print(fname)
