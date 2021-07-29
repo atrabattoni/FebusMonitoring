@@ -91,9 +91,10 @@ class Watcher():
             self.newfile, = newfiles
 
             # Process old file
-            th = threading.Thread(target=process, args=(self.currentfile))
-            th.start()
-            
+            if self.currentfile is not None:
+                th = threading.Thread(target=process, args=(self.currentfile))
+                th.start()
+
             self.currentfile = self.newfile
 
         else:
