@@ -117,8 +117,9 @@ class Watcher():
 
 
 def process(fname):
+    drive = pathlib.Path("/run/media/febus/Elements")
     print(f"Processing: {fname}... ", end="")
     xarr = daspy.io.read(fname)
     xarr = daspy.io.trim(xarr)
-    xarr.to_netcdf(fname.with_suffix(".nc"))
+    xarr.to_netcdf(drive / fname.with_suffix(".nc"))
     print("Done.")
