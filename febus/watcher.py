@@ -118,6 +118,6 @@ class Watcher():
 
 def process(fname):
     xarr = daspy.io.read(fname)
-    xarr = daspy.io.trim(fname)
+    xarr = daspy.io.trim(xarr)
     fname = fname.replace(".h5", ".nc")
     xarr.to_netcdf(fname)
