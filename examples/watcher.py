@@ -1,7 +1,7 @@
 from febus import FebusDevice, Watcher
 import warnings
 import pathlib
-import daspy
+import daspy.io
 import shutil
 
 
