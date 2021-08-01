@@ -1,2 +1,2 @@
-# from .cli import FebusDevice
-# from .watcher import Watcher
+from .cli import FebusDevice
+from .watcher import Watcher

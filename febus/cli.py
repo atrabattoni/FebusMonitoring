@@ -5,13 +5,16 @@ import time
 
 # Set environment for ClientCli
 KEY = "LD_LIBRARY_PATH"
-VALUE = """
-:/usr/lib64/openmpi/lib/paraview/site-packages/vtk
-:/usr/lib64/openmpi/lib/paraview
-:/opt/febus-a1/lib:/opt/febus-a1/lib/paraview
-"""
+VALUES = [
+    "/usr/lib64/openmpi/lib/paraview/site-packages/vtk",
+    "/usr/lib64/openmpi/lib/paraview",
+    "/opt/febus-a1/lib:/opt/febus-a1/lib/paraview",
+]
 ENV = os.environ.copy()
-ENV[KEY] = ENV[KEY] + VALUE
+if KEY in ENV:
+    ENV[KEY] = ":".join(ENV[KEY] + VALUES)
+else:
+    ENV[KEY] = ":".join(VALUES)
 
 # Set path to enable/disable hdf5 writing
 STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
