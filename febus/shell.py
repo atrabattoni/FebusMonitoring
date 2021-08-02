@@ -33,11 +33,11 @@ class FebusShell(cmd.Cmd):
                 input("Frequency resolution [Hz]: "))
             kwargs["spatial_resolution"] = int(input("Pulse width [m]: "))
             kwargs["ampli_power"] = int(input("Ampli power [dBm]: "))
-            kwargs["cutoff_frequency"] = float(input("Ampli power [dBm]: "))
+            kwargs["cutoff_frequency"] = float(input("Pulse Frequency [Hz]: "))
             kwargs["gauge_length"] = 1
             kwargs["sampling_resolution"] = int(
                 input("Sampling resolution [cm]: "))
-            kwargs["pipeline_fname"] = int(input("Pipeline path: "))
+            kwargs["pipeline_fname"] = input("Pipeline path: ")
             self.device.start_acquisition(**kwargs)
         if "stop" in arg:
             self.device.stop_acquisition()
