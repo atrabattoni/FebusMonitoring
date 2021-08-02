@@ -76,7 +76,7 @@ class FebusShell(cmd.Cmd):
 
     def do_info(self, arg):
         if self.watcher is not None:
-            for key, item in self.info.items():
+            for key, item in self.watcher.info.items():
                 print(f"{key}: {item}")
 
 
