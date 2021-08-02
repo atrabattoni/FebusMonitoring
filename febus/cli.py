@@ -15,9 +15,7 @@ ENV = os.environ.copy()
 if KEY in ENV:
     VALUES = ENV[KEY].split(":") + VALUES
     VALUES = [value for value in VALUES if value]
-    ENV[KEY] = ":".join(ENV[KEY] + VALUES)
-else:
-    ENV[KEY] = ":".join(VALUES)
+ENV[KEY] = ":".join(VALUES)
 
 # Set path to enable/disable hdf5 writing
 STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
