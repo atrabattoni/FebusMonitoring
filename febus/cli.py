@@ -8,10 +8,13 @@ KEY = "LD_LIBRARY_PATH"
 VALUES = [
     "/usr/lib64/openmpi/lib/paraview/site-packages/vtk",
     "/usr/lib64/openmpi/lib/paraview",
-    "/opt/febus-a1/lib:/opt/febus-a1/lib/paraview",
+    "/opt/febus-a1/lib",
+    "/opt/febus-a1/lib/paraview",
 ]
 ENV = os.environ.copy()
 if KEY in ENV:
+    VALUES = ENV[KEY].split(":") + VALUES
+    VALUES = [value for value in VALUES if value]
     ENV[KEY] = ":".join(ENV[KEY] + VALUES)
 else:
     ENV[KEY] = ":".join(VALUES)
