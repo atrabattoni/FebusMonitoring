@@ -2,9 +2,8 @@ import cmd
 import importlib.util
 import pathlib
 
-from watcher import Watcher
-
 from .cli import FebusDevice
+from .watcher import Watcher
 
 
 class FebusShell(cmd.Cmd):
