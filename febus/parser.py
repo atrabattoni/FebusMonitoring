@@ -18,7 +18,7 @@ def parse_error(line):
 
 
 def parse_newloop(line):
-    if line == "New loop \n":
+    if "New loop" in line:
         return "newloop"
 
 
@@ -49,7 +49,7 @@ def parse_trigger(line):
 
 
 def parse_block(line):
-    pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) (?P<blocktime>\d*\.?\d*) \|realtime: (?P<realtime>\d*\.?\d*)\| \d*\.?\d* -?\d*\.?\d*"
+    pattern = r"CoProcessing (?P<blockid>\d+) (?P<blocktime>\d*\.?\d*) \|realtime: (?P<realtime>\d*\.?\d*)"
     m = re.match(pattern, line)
     if m is not None:
         blockid = int(m.group("blockid"))
@@ -69,7 +69,7 @@ def parse_writing(line):
 
 
 def parse_coprocessing(line):
-    pattern = r"###Coprocessing took (?P<coprocessingtime>\d*\.?\d*) \(seconds\)"
+    pattern = r"Coprocessing took (?P<coprocessingtime>\d*\.?\d*) \(seconds\)"
     m = re.match(pattern, line)
     if m is not None:
         coprocessingtime = round(float(m.group("coprocessingtime")), 3)

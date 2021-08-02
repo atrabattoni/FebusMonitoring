@@ -1,4 +1,6 @@
 import atexit
+import datetime
+import pathlib
 import signal
 import subprocess
 import sys
@@ -16,7 +18,8 @@ def dummy():
 class DummyDevice:
 
     def __init__(self):
-        pass
+        self.stop_acquisition()
+        self.disable_writings()
 
     def start_server(self, gps=False):
         # def preexec_fn():
@@ -71,6 +74,26 @@ class DummyDevice:
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal.SIG_IGN)
+    print("Dummy device started.")
+    utcdatetime = datetime.datetime.utcnow()
+    walltime = 1.0
+    pulseid = 0
+    pulsetime = utcdatetime
+    trigid = 0
+    blockid = 0
+    blocktime = utcdatetime
+    realtime = utcdatetime
+    writingtime = 2.0
+    coprocessingtime = 0.1
+
     while True:
-        print("Hello world!", flush=True)
+        if not pathlib.Path(STOP_ACQUISITION_PATH).is_file():
+            print("New loop", flush=True)
+            print("[SERVER] cuda block wall clock {walltime}")
+            print("CoProcess ref pulseID: {pulseid} timestamp:{pulsetime}")
+            print("CoProcess trigid: {trigid}")
+            print("CoProcessing {blockid} {blocktime} |realtime: {realtime}")
+            if not pathlib.Path(STOP_WRITINGS_PATH).is_file():
+                print("[HDF5Writer][Info] Writing data took {writingtime} ms")
+            print("Coprocessing took {coprocessingtime} (seconds)")
         time.sleep(1)
