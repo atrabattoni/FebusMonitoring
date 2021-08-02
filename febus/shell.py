@@ -33,7 +33,7 @@ class FebusShell(cmd.Cmd):
                 input("Frequency resolution [Hz]: "))
             kwargs["spatial_resolution"] = int(input("Pulse width [m]: "))
             kwargs["ampli_power"] = int(input("Ampli power [dBm]: "))
-            kwargs["cutoff_frequency"] = float(input("Pulse Frequency [Hz]: "))
+            kwargs["cutoff_frequency"] = int(input("Pulse Frequency [Hz]: "))
             kwargs["gauge_length"] = 1
             kwargs["sampling_resolution"] = int(
                 input("Sampling resolution [cm]: "))
