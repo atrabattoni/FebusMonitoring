@@ -74,7 +74,9 @@ class Watcher:
         files = list(pathlib.Path(".").glob("*.h5"))
         newfiles = [file for file in files if file not in self.oldfiles]
         self.oldfiles.extend(newfiles)
-        if len(newfiles) == 1:
+        if len(newfiles) == 0:
+            self.isnewfile = False
+        elif len(newfiles) == 1:
             newfile, = newfiles
             self.isnewfile = True
 
@@ -88,9 +90,8 @@ class Watcher:
                 process.start()
 
             self.currentfile = newfile
-
         else:
-            self.isnewfile = False
+            raise RuntimeError("Too many new files.")
 
     def log_info(self, error=False):
         fname = str(self.currentfile).replace(".h5", ".log")
