@@ -27,20 +27,27 @@ class FebusShell(cmd.Cmd):
     def do_acquisition(self, arg):
         ""
         if "start" in arg:
-            kwargs = {}
-            kwargs["fiber_length"] = int(input("Fiber length [m]: "))
-            kwargs["frequency_resolution"] = float(
-                input("Frequency resolution [Hz]: "))
-            kwargs["spatial_resolution"] = int(input("Pulse width [m]: "))
-            kwargs["ampli_power"] = int(input("Ampli power [dBm]: "))
-            kwargs["cutoff_frequency"] = int(input("Pulse Frequency [Hz]: "))
-            kwargs["gauge_length"] = 1
-            kwargs["sampling_resolution"] = int(
-                input("Sampling resolution [cm]: "))
-            kwargs["pipeline_fname"] = input("Pipeline path: ")
+            kwargs = {
+                "fiber_length": int(input("Fiber length [m]: ")),
+                "frequency_resolution": float(input("Frequency resolution [Hz]: ")),
+                "spatial_resolution": int(input("Pulse width [m]: ")),
+                "ampli_power": int(input("Ampli power [dBm]: ")),
+                "cutoff_frequency": int(input("Pulse Frequency [Hz]: ")),
+                "gauge_length": 1,
+                "sampling_resolution": int(input("Sampling resolution [cm]: ")),
+                "pipeline_fname": input("Pipeline path: "),
+            }
             self.device.start_acquisition(**kwargs)
         if "stop" in arg:
             self.device.stop_acquisition()
+
+    def do_status(self, arg):
+        ""
+        self.device.get_status()
+
+    def do_params(self, arg):
+        ""
+        self.device.get_params()
 
     def do_writings(self, arg):
         ""
