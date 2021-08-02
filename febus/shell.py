@@ -72,6 +72,12 @@ class FebusShell(cmd.Cmd):
             self.watcher.start_monitoring()
         if "stop" in arg:
             self.watcher.terminate_monitoring()
+            self.watcher = None
+
+    def do_info(self, arg):
+        if self.watcher is not None:
+            for key, item in self.info.items():
+                print(f"{key}: {item}")
 
 
 if __name__ == '__main__':
