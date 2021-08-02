@@ -48,7 +48,7 @@ class Watcher:
                 self.log_info(error=error)
                 self.dump_info(error=error)
                 self.dump_lines(error=error)
-            elif result == "newloop":
+            elif result == "error":
                 error = True
             else:
                 pass
@@ -67,7 +67,8 @@ class Watcher:
             if "writingtime" in result:
                 self.watch_files()
                 self.info["currentfile"] = self.currentfile
-                self.info["currentsize"] = self.currentfile.stat().st_size
+                if self.currentfile is not None:
+                    self.info["currentsize"] = self.currentfile.stat().st_size
         self.stream.append(line)
 
     def watch_files(self):
