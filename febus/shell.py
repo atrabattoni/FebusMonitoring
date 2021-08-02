@@ -43,11 +43,11 @@ class FebusShell(cmd.Cmd):
 
     def do_status(self, arg):
         ""
-        self.device.get_status()
+        print(self.device.get_status())
 
     def do_params(self, arg):
         ""
-        self.device.get_params()
+        print(self.device.get_params())
 
     def do_writings(self, arg):
         ""
