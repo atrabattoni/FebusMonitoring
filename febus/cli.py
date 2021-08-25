@@ -1,6 +1,6 @@
 import atexit
 import os
-import signal
+# import signal
 import subprocess
 import time
 
@@ -46,8 +46,10 @@ class FebusDevice:
         print(f"Server Started {'with GPS' if gps else ''}")
 
     def terminate_server(self):
-        # self.server.terminate()
-        os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
+        # os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
+        self.server.terminate()
+        self.server.wait()
+        self.server = None
         print("Server Terminated")
 
     @staticmethod
