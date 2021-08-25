@@ -92,7 +92,3 @@ class FebusShell(cmd.Cmd):
 
     def do_exit(self):
         exit()
-
-
-if __name__ == '__main__':
-    FebusShell().cmdloop()
