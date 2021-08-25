@@ -7,7 +7,7 @@ from .watcher import Watcher
 
 
 class FebusShell(cmd.Cmd):
-    intro = "Type help or ? to list commands.\n"
+    intro = "Type help or ? to list commands."
     prompt = "(febus) "
 
     def preloop(self):
@@ -94,3 +94,7 @@ class FebusShell(cmd.Cmd):
 
     def do_exit(self, arg):
         exit()
+
+
+def fsh():
+    FebusShell().cmdloop()
