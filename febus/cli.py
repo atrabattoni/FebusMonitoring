@@ -38,7 +38,6 @@ class FebusDevice:
             preexec_fn=os.setsid,
         )
         self.server.stdout.reconfigure(line_buffering=True, write_through=True)
-        atexit.register(self.__del__)
         time.sleep(1)
         print(f"Server Started {'with GPS' if self.gps else 'without GPS'}")
 
