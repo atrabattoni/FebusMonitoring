@@ -51,16 +51,15 @@ class FebusShell(cmd.Cmd):
 
     def do_params(self, arg):
         ""
-        print(self.device.get_params())
+        for key, item in self.device.get_params().items:
+            print(key, item)
 
     def do_writings(self, arg):
         ""
         if arg == "start":
             self.device.enable_writings()
-            print("Writings")
         elif arg == "stop":
             self.device.disable_writings()
-            print("Enabling writings")
         else:
             print("Argument not understood. Must be 'start' or 'stop'")
 
@@ -88,6 +87,11 @@ class FebusShell(cmd.Cmd):
         if self.watcher is not None:
             for key, item in self.watcher.info.items():
                 print(f"{key}: {item}")
+        else:
+            print("Watcher not started.")
+
+    def do_exit(self):
+        exit()
 
 
 if __name__ == '__main__':

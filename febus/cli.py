@@ -40,7 +40,7 @@ class FebusDevice:
         self.server.stdout.reconfigure(line_buffering=True, write_through=True)
         atexit.register(self.__del__)
         time.sleep(1)
-        print(f"Server Started {'with GPS' if self.gps else ''}")
+        print(f"Server Started {'with GPS' if self.gps else 'without GPS'}")
 
     def __del__(self):
         os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
