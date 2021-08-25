@@ -67,11 +67,13 @@ class FebusDevice:
             ],
             env=ENV,
         )
+        print("Acquisition Started")
 
     @staticmethod
     def stop_acquisition():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "stop"]
         subprocess.call(cmd, env=ENV)
+        print("Acquisition Stopped")
 
     @staticmethod
     def get_status():
@@ -89,8 +91,10 @@ class FebusDevice:
     def enable_writings():
         cmd = ["rm", "-f", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
+        print("Writings Enabled")
 
     @staticmethod
     def disable_writings():
         cmd = ["touch", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
+        print("Writings Disabled")

@@ -12,21 +12,23 @@ class FebusShell(cmd.Cmd):
 
     def __init__(self, *args, **kwargs):
         self.device = FebusDevice()
+        self.watcher = None
         super().__init__(*args, **kwargs)
 
     def do_server(self, arg):
         ""
-        if "start" in arg:
-            if "gps" in arg:
-                self.device.start_server(gps=True)
-            else:
-                self.device.start_server(gps=False)
-        if "stop" in arg:
+        if arg == "start":
+            self.device.start_server(gps=False)
+        elif arg == "start gps":
+            self.device.start_server(gps=True)
+        elif arg == "stop":
             self.device.terminate_server()
+        else:
+            print("Argument not understood. Must be 'start', 'start gps' or 'stop'")
 
     def do_acquisition(self, arg):
         ""
-        if "start" in arg:
+        if arg == "start":
             kwargs = {
                 "fiber_length": int(input("Fiber length [m]: ")),
                 "frequency_resolution": float(input("Frequency resolution [Hz]: ")),
@@ -38,8 +40,10 @@ class FebusShell(cmd.Cmd):
                 "pipeline_fname": input("Pipeline path: "),
             }
             self.device.start_acquisition(**kwargs)
-        if "stop" in arg:
+        elif arg == "stop":
             self.device.stop_acquisition()
+        else:
+            print("Argument not understood. Must be 'start' or 'stop'")
 
     def do_status(self, arg):
         ""
@@ -51,14 +55,18 @@ class FebusShell(cmd.Cmd):
 
     def do_writings(self, arg):
         ""
-        if "start" in arg:
+        if arg == "start":
             self.device.enable_writings()
-        if "stop" in arg:
+            print("Writings")
+        elif arg == "stop":
             self.device.disable_writings()
+            print("Enabling writings")
+        else:
+            print("Argument not understood. Must be 'start' or 'stop'")
 
     def do_watcher(self, arg):
         ""
-        if "start" in arg:
+        if arg == "start":
             path = input("Data_processor_path :")
             if path:
                 path = pathlib.Path(path)
@@ -70,9 +78,11 @@ class FebusShell(cmd.Cmd):
                 data_processor = None
             self.watcher = Watcher(self.device, data_processor=data_processor)
             self.watcher.start_monitoring()
-        if "stop" in arg:
+        elif arg == "stop":
             self.watcher.terminate_monitoring()
             self.watcher = None
+        else:
+            print("Argument not understood. Must be 'start' or 'stop'")
 
     def do_info(self, arg):
         if self.watcher is not None:
