@@ -1,3 +1,3 @@
 import febus.shell
 
-febus.shellFebusShell().cmdloop()
+febus.shell.FebusShell().cmdloop()
