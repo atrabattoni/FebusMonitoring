@@ -41,7 +41,7 @@ class FebusDevice:
         self.server.gps = gps
         atexit.register(self.terminate_server)
         time.sleep(1)
-        print("Server Started")
+        print(f"Server Started {'with GPS' if gps else ''}")
 
     def terminate_server(self):
         self.server.terminate()
