@@ -7,10 +7,12 @@ from .watcher import Watcher
 
 
 class FebusShell(cmd.Cmd):
-    intro = "Welcome to the febus shell. Type help or ? to list commands.\n"
+    intro = "Type help or ? to list commands.\n"
     prompt = "(febus) "
 
     def preloop(self):
+
+        print("Welcome to the febus shell.")
 
         def ask_gps():
             gps = input("Would you like to use GPS synchronisation ? [y/n]: ")
@@ -90,5 +92,5 @@ class FebusShell(cmd.Cmd):
         else:
             print("Watcher not started.")
 
-    def do_exit(self):
+    def do_exit(self, arg):
         exit()
