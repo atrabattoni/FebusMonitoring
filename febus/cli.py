@@ -24,7 +24,7 @@ STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
 class FebusDevice:
 
     def __init__(self):
-        pass
+        self.server = None
 
     def start_server(self, gps=False):
         cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
@@ -78,13 +78,13 @@ class FebusDevice:
     @staticmethod
     def get_status():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "get-status"]
-        out = subprocess.check_output(cmd, env=ENV)
+        out = subprocess.check_output(cmd, env=ENV, text=True)
         return out.splitlines()[1]
 
     @staticmethod
     def get_params():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "get-params"]
-        out = subprocess.check_output(cmd, env=ENV)
+        out = subprocess.check_output(cmd, env=ENV, text=True)
         return out.splitlines()[1:]
 
     @staticmethod
