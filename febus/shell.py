@@ -10,21 +10,23 @@ class FebusShell(cmd.Cmd):
     intro = "Welcome to the febus shell. Type help or ? to list commands.\n"
     prompt = "(febus) "
 
-    def __init__(self, *args, **kwargs):
-        self.device = FebusDevice()
-        self.watcher = None
-        super().__init__(*args, **kwargs)
+    def preloop(self):
 
-    def do_server(self, arg):
-        ""
-        if arg == "start":
-            self.device.start_server(gps=False)
-        elif arg == "start gps":
-            self.device.start_server(gps=True)
-        elif arg == "stop":
-            self.device.terminate_server()
-        else:
-            print("Argument not understood. Must be 'start', 'start gps' or 'stop'")
+        def ask_gps():
+            gps = input("Would you like to use GPS synchronisation ? [y/n]")
+            if gps == "y":
+                gps = True
+                print("GPS synchronisation enabled")
+            elif gps == "n":
+                gps = False
+                print("GPS synchronisation disabled")
+            else:
+                print("Argument not understood")
+                ask_gps()
+            return gps
+
+        self.device = FebusDevice(gps=ask_gps())
+        self.watcher = None
 
     def do_acquisition(self, arg):
         ""

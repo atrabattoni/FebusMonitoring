@@ -1,6 +1,5 @@
 import atexit
 import os
-# import signal
 import subprocess
 import time
 
@@ -24,12 +23,10 @@ STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
 
 class FebusDevice:
 
-    def __init__(self):
-        self.server = None
-
-    def start_server(self, gps=False):
+    def __init__(self, gps):
+        self.gps = gps
         cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
-        if gps:
+        if self.gps:
             cmd.append("gps")
         self.server = subprocess.Popen(
             cmd,
@@ -40,16 +37,13 @@ class FebusDevice:
             preexec_fn=os.setsid,
         )
         self.server.stdout.reconfigure(line_buffering=True, write_through=True)
-        self.server.gps = gps
-        atexit.register(self.terminate_server)
+        atexit.register(self.__del__)
         time.sleep(1)
-        print(f"Server Started {'with GPS' if gps else ''}")
+        print(f"Server Started {'with GPS' if self.gps else ''}")
 
-    def terminate_server(self):
-        # os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
+    def __del__(self):
         self.server.terminate()
         self.server.wait()
-        self.server = None
         print("Server Terminated")
 
     @staticmethod
