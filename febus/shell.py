@@ -13,15 +13,13 @@ class FebusShell(cmd.Cmd):
     def preloop(self):
 
         def ask_gps():
-            gps = input("Would you like to use GPS synchronisation ? [y/n]")
+            gps = input("Would you like to use GPS synchronisation ? [y/n]: ")
             if gps == "y":
                 gps = True
-                print("GPS synchronisation enabled")
             elif gps == "n":
                 gps = False
-                print("GPS synchronisation disabled")
             else:
-                print("Argument not understood")
+                print("Argument not understood. Must be 'y' or 'n'.")
                 ask_gps()
             return gps
 
