@@ -28,6 +28,15 @@ class FebusShell(cmd.Cmd):
         self.device = FebusDevice(gps=ask_gps())
         self.watcher = None
 
+    def cmdloop(self, intro=None):
+        print(self.intro)
+        while True:
+            try:
+                super(FebusShell, self).cmdloop(intro="")
+                break
+            except KeyboardInterrupt:
+                print("^C")
+
     def do_acquisition(self, arg):
         ""
         if arg == "start":
