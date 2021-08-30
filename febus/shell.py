@@ -53,8 +53,9 @@ class FebusShell(cmd.Cmd):
 
     def do_params(self, arg):
         ""
-        for key, item in self.device.get_params().items:
-            print(key, item)
+        print(self.device.get_params())
+        # for key, item in self.device.get_params().items:
+        #     print(key, item)
 
     def do_writings(self, arg):
         ""
