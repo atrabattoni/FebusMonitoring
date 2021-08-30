@@ -2,6 +2,7 @@ import datetime
 import multiprocessing
 import os
 import pathlib
+import time
 import threading
 
 from . import parser
@@ -50,6 +51,10 @@ class Watcher:
                 self.dump_lines(error=error)
             elif result == "error":
                 error = True
+            elif result == "timeout":
+                time.sleep(1)
+                self.device.start_acquisition(self.device.params)
+                print("Timeout occured. Relaunch acquisition.")
             else:
                 pass
         if isinstance(result, dict):

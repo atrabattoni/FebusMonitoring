@@ -4,7 +4,8 @@ import re
 
 def parse(line):
     parsers = [parse_newloop, parse_walltime, parse_pulse, parse_trigger,
-               parse_block, parse_writing, parse_coprocessing, parse_error]
+               parse_block, parse_writing, parse_coprocessing, parse_timeout,
+               parse_error]
     for parser in parsers:
         out = parser(line)
         if out is not None:
@@ -74,3 +75,9 @@ def parse_coprocessing(line):
     if m is not None:
         coprocessingtime = round(float(m.group("coprocessingtime")), 3)
         return {"coprocessingtime": coprocessingtime}
+
+
+def parse_timeout(line):
+    pattern = "A timeout occurred while waiting for trigger during TSR acquisition"
+    if pattern in line:
+        return "timeout"
