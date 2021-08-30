@@ -19,6 +19,7 @@ class Watcher:
         self.stream = []
         self.isnewfile = False
         self.temporary_disabled = False
+        self.monitoring = False
 
     def start_monitoring(self):
         self.monitoring = True

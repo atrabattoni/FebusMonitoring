@@ -27,12 +27,13 @@ class FebusShell(cmd.Cmd):
 
         self.device = FebusDevice(gps=ask_gps())
         self.watcher = None
+        self.preloop = super().preloop
 
     def cmdloop(self, intro=None):
         print(self.intro)
         while True:
             try:
-                super(FebusShell, self).cmdloop(intro="")
+                super().cmdloop(intro="")
                 break
             except KeyboardInterrupt:
                 print("^C")
