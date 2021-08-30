@@ -44,9 +44,12 @@ class FebusDevice:
         print(f"Server Started {'with GPS' if self.gps else 'without GPS'}")
 
     def __del__(self):
-        os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
-        self.server.wait()
-        print("Server Terminated")
+        try:
+            os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
+            self.server.wait()
+            print("Server Terminated")
+        except ProcessLookupError:
+            print("Server Already Terminated")
 
     def start_acquisition(self, fiber_length, frequency_resolution,
                           spatial_resolution, ampli_power, cutoff_frequency,
