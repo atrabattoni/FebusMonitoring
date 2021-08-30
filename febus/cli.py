@@ -49,7 +49,7 @@ class FebusDevice:
             self.server.wait()
             print("Server Terminated")
         except ProcessLookupError:
-            print("Server Already Terminated")
+            pass
 
     def start_acquisition(self, fiber_length, frequency_resolution,
                           spatial_resolution, ampli_power, cutoff_frequency,

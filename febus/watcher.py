@@ -54,7 +54,7 @@ class Watcher:
                 error = True
             elif result == "timeout":
                 time.sleep(1)
-                self.device.start_acquisition(self.device.params)
+                self.device.start_acquisition(**self.device.params)
                 print("Timeout occured. Relaunch acquisition.")
             else:
                 pass
