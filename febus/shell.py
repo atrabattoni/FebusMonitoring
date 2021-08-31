@@ -79,7 +79,7 @@ class FebusShell(cmd.Cmd):
     def do_watcher(self, arg):
         ""
         if arg == "start":
-            path = input("Data_processor_path :")
+            path = input("Data_processor_path: ")
             if path:
                 path = pathlib.Path(path)
                 spec = importlib.util.spec_from_file_location(path.name, path)

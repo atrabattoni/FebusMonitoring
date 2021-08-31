@@ -106,7 +106,7 @@ class Watcher:
             fname = fname.replace(".log", "_error.log")
         sep = ","
         with open(fname, "a") as file:
-            if self.isnewfile is not None:
+            if self.isnewfile:
                 file.write(sep.join(self.info.keys()) + "\n")
             values = [str(value) for value in self.info.values()]
             file.write(sep.join(values) + "\n")
