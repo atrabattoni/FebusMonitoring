@@ -22,13 +22,13 @@ class Monitor:
         self.temporary_disabled = False
         self.is_monitoring = True
 
-        def _monitoring():
+        def target():
             for line in self.device.server.stdout:
                 self.monitor(line)
                 if not self.is_monitoring:
                     break
 
-        self.thread = threading.Thread(target=_monitoring)
+        self.thread = threading.Thread(target=target)
         self.thread.start()
         print("Monitoring Started")
 
@@ -97,11 +97,11 @@ class Monitor:
 
     def process_data(self):
         if (self.data_processor is not None) and (self.currentfile is not None):
-            def _data_processor(fname):
+            def target(fname):
                 os.nice(19)
                 self.data_processor(fname)
         process = multiprocessing.Process(
-            target=_data_processor, args=(self.currentfile,))
+            target=target, args=(self.currentfile,))
         process.start()
 
     def log_info(self, error=False):
