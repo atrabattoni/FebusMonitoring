@@ -47,6 +47,7 @@ class Monitor:
                 self.callback_timeout()
             else:
                 print(result)
+                print(line)
         if isinstance(result, dict):
             self.info.update(result)
             if "blocktime" in result:

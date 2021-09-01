@@ -25,6 +25,7 @@ def fsh():
         print("To stop the acquisition press CTRL+C.")
         device.server.wait()
     except KeyboardInterrupt:
+        print()
         if input_bool("Are you sure you want to stop the acquisition?"):
             device.disable_writings()
             time.sleep(1)
