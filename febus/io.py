@@ -91,10 +91,10 @@ def read_config(path):
 
 def get_config(argv):
     if len(argv) <= 1:
-        config = input_config()
+        return input_config()
         write_config(config)
     elif len(argv) == 2:
-        config = read_config(argv[1])
+        return read_config(argv[1])
     else:
         print("Wrong number of arguments. Should be zero for manual parameter "
               "selection, or one to specify the configuration file.")
