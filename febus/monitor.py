@@ -21,40 +21,36 @@ class Monitor:
         self.isnewfile = False
         self.temporary_disabled = False
         self.is_monitoring = True
-
-        def target():
-            for line in self.device.server.stdout:
-                self.monitor(line)
-                if not self.is_monitoring:
-                    break
-
-        self.thread = threading.Thread(target=target)
+        self.thread = threading.Thread(target=self.monitor)
         self.thread.start()
         print("Monitoring started.")
+
+    def monitor(self):
+        for line in self.device.server.stdout:
+            self.stream.append(line)
+            result = parse(line)
+            if isinstance(result, str):
+                if result == "newloop":
+                    if not self.is_monitoring:
+                        return
+                    self.callback_newloop()
+                elif result == "timeout":
+                    self.callback_timeout()
+                else:
+                    print(result)
+                    print(line)
+            if isinstance(result, dict):
+                self.info.update(result)
+                if "blocktime" in result:
+                    blocktime = result["blocktime"]
+                    self.callback_3236(blocktime)
+                if "writingtime" in result:
+                    self.callback_files()
 
     def __del__(self):
         self.is_monitoring = False
         self.thread.join()
         print("Monitoring terminated.")
-
-    def monitor(self, line):
-        self.stream.append(line)
-        result = parse(line)
-        if isinstance(result, str):
-            if result == "newloop":
-                self.callback_newloop()
-            elif result == "timeout":
-                self.callback_timeout()
-            else:
-                print(result)
-                print(line)
-        if isinstance(result, dict):
-            self.info.update(result)
-            if "blocktime" in result:
-                blocktime = result["blocktime"]
-                self.callback_3236(blocktime)
-            if "writingtime" in result:
-                self.callback_files()
 
     def callback_newloop(self):
         print(".", end="", flush=True)

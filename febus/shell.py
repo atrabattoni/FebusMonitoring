@@ -27,13 +27,8 @@ def fsh():
         device.start_acquisition(**config["acquisition"])
         device.enable_writings()
         print("To stop the acquisition press CTRL+C.")
-        while True:
-            time.sleep(0.1)
     except KeyboardInterrupt:
-        print()
-        if input_bool("Are you sure you want to stop the acquisition?") == "yes":
-            device.disable_writings()
-            time.sleep(1 / float(config["acquisition"]["frequency_resolution"]))
-            exit()
-        else:
-            print("Resuming acquisition...")
+        device.disable_writings()
+        del monitor
+        del device
+        exit()
