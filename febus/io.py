@@ -5,13 +5,12 @@ from pathlib import Path
 def input_bool(question):
     answer = input(f"{question} [y/n]: ")
     if answer == "y":
-        out = True
+        return True
     elif answer == "n":
-        out = False
+        return False
     else:
         print("Answer not understood. Must be 'y' or 'n'.")
-        input_bool(question)
-    return out
+        return input_bool(question)
 
 
 def input_int(name):
@@ -20,7 +19,7 @@ def input_int(name):
         return int(out)
     except ValueError:
         print("Inputed string could not converted to integer.")
-        input_int(name)
+        return input_int(name)
 
 
 def input_float(name):
@@ -29,7 +28,7 @@ def input_float(name):
         return float(out)
     except ValueError:
         print("Inputed string could not converted to float.")
-        input_int(name)
+        return input_float(name)
 
 
 def input_path(name):
@@ -38,7 +37,7 @@ def input_path(name):
         return path
     else:
         print("File not found.")
-        input_path(name)
+        return input_path(name)
 
 
 def import_path(path):

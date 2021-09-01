@@ -51,20 +51,10 @@ class FebusDevice:
         except ProcessLookupError:
             pass
 
-    def start_acquisition(self, fiber_length, frequency_resolution,
+    @staticmethod
+    def start_acquisition(fiber_length, frequency_resolution,
                           spatial_resolution, ampli_power, cutoff_frequency,
                           gauge_length, sampling_resolution, pipeline_fname):
-
-        self.params = dict(
-            fiber_length=fiber_length,
-            frequency_resolution=frequency_resolution,
-            spatial_resolution=spatial_resolution,
-            ampli_power=ampli_power,
-            cutoff_frequency=cutoff_frequency,
-            gauge_length=gauge_length,
-            sampling_resolution=sampling_resolution,
-            pipeline_fname=pipeline_fname,
-        )
         subprocess.call(
             [
                 "/opt/febus-a1/bin/ClientCli",
@@ -83,27 +73,39 @@ class FebusDevice:
         )
         print("Acquisition Started")
 
-    def stop_acquisition(self):
+    @staticmethod
+    def stop_acquisition():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "stop"]
         subprocess.call(cmd, env=ENV)
         print("Acquisition Stopped")
 
-    def get_status(self):
+    @staticmethod
+    def get_status():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "get-status"]
         out = subprocess.check_output(cmd, env=ENV, text=True)
         return out.splitlines()[1]
 
-    def get_params(self):
+    @staticmethod
+    def get_params():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "get-params"]
         out = subprocess.check_output(cmd, env=ENV, text=True)
-        return out.splitlines()[1:]
+        d = {}
+        for s in out.splitlines()[1:]:
+            key, value = s.split(":")
+            key = key.strip()
+            value = value.strip()
+            d[key] = value
+        return d
 
-    def enable_writings(self):
+
+    @staticmethod
+    def enable_writings():
         cmd = ["rm", "-f", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
         print("Writings Enabled")
 
-    def disable_writings(self):
+    @staticmethod
+    def disable_writings():
         cmd = ["touch", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
         print("Writings Disabled")

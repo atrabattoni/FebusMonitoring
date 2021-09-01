@@ -1,9 +1,10 @@
 import cmd
+import subprocess
 import time
 
 from .cli import FebusDevice
 from .io import import_path, input_bool, input_params, input_path
-from .watcher import Watcher
+from .monitor import Monitor
 
 
 def fsh():
@@ -26,8 +27,7 @@ class FebusShell(cmd.Cmd):
             self.data_processor = None
         # Start Acquisition
         self.device = FebusDevice(gps=self.gps)
-        self.monitor = Watcher(self.device, data_processor=self.data_processor)
-        self.monitor.start_monitoring()
+        self.monitor = Monitor(self.device, data_processor=self.data_processor)
         self.device.start_acquisition(**self.params)
         self.device.enable_writings()
 
@@ -41,17 +41,12 @@ class FebusShell(cmd.Cmd):
                 print("^C")
 
     def do_status(self, arg):
-        ""
         print(self.device.get_status())
 
     def do_params(self, arg):
-        ""
         print(self.device.get_params())
-        # for key, item in self.device.get_params().items:
-        #     print(key, item)
 
     def do_writings(self, arg):
-        ""
         if arg == "enable":
             self.device.enable_writings()
         elif arg == "disable":
@@ -59,17 +54,12 @@ class FebusShell(cmd.Cmd):
         else:
             print("Argument not understood. Must be 'enable' or 'disable'")
 
-    def do_info(self, arg):
-        if self.watcher is not None:
-            for key, item in self.watcher.info.items():
-                print(f"{key}: {item}")
-        else:
-            print("Watcher not started.")
+    def default(self, arg):
+        print(subprocess.check_output(arg, shell=True, text=True))
 
     def do_exit(self, arg):
         self.device.disable_writings()
         time.sleep(1)
-        self.device.stop_acquisition()
-        time.sleep(1)
+        del self.monitor
         del self.device
         exit()

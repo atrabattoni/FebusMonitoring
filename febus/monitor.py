@@ -5,13 +5,14 @@ import pathlib
 import time
 import threading
 
-from . import parser
+from .parser import parse
 
 
-class Watcher:
+class Monitor:
 
-    def __init__(self, device, data_processor):
+    def __init__(self, device, params, data_processor):
         self.device = device
+        self.params = params
         self.data_processor = data_processor
         self.currentfile = None
         self.oldfiles = list(pathlib.Path(".").glob("*.h5"))
@@ -19,65 +20,65 @@ class Watcher:
         self.stream = []
         self.isnewfile = False
         self.temporary_disabled = False
-        self.monitoring = False
+        self.is_monitoring = True
 
-    def start_monitoring(self):
-        self.monitoring = True
-
-        def monitoring():
+        def _monitoring():
             for line in self.device.server.stdout:
-                self.parse(line)
-                if not self.monitoring:
+                self.monitor(line)
+                if not self.is_monitoring:
                     break
 
-        self.thread = threading.Thread(target=monitoring)
+        self.thread = threading.Thread(target=_monitoring)
         self.thread.start()
         print("Monitoring Started")
 
-    def terminate_monitoring(self):
-        self.monitoring = False
+    def __del__(self):
+        self.is_monitoring = False
         self.thread.join()
         print("Monitoring Terminated")
 
-    def parse(self, line):
-        result = parser.parse(line)
+    def monitor(self, line):
+        self.stream.append(line)
+        result = parse(line)
         if isinstance(result, str):
             if result == "newloop":
-                if None in self.info.values():
-                    error = True
-                else:
-                    error = False
-                self.log_info(error=error)
-                self.dump_info(error=error)
-                self.dump_lines(error=error)
-            elif result == "error":
-                error = True
+                self.callback_newloop()
             elif result == "timeout":
-                time.sleep(1)
-                self.device.start_acquisition(**self.device.params)
-                print("Timeout occured. Relaunch acquisition.")
+                self.callback_timeout()
             else:
-                pass
+                print(result)
         if isinstance(result, dict):
             self.info.update(result)
             if "blocktime" in result:
                 blocktime = result["blocktime"]
-                # Solve 3236 Error
-                if blocktime > datetime.datetime(3000, 1, 1):
-                    self.device.disable()
-                    self.temporary_disabled = True
-                else:
-                    if self.temporary_disabled:
-                        self.device.enable()
-                        self.temporary_disabled = False
+                self.callback_3236(blocktime)
             if "writingtime" in result:
-                self.watch_files()
-                self.info["currentfile"] = self.currentfile
-                if self.currentfile is not None:
-                    self.info["currentsize"] = self.currentfile.stat().st_size
-        self.stream.append(line)
+                self.callback_files()
 
-    def watch_files(self):
+    def callback_newloop(self):
+        if None in self.info.values():
+            error = True
+        else:
+            error = False
+        self.log_info(error=error)
+        self.dump_info(error=error)
+        self.dump_lines(error=error)
+
+    def callback_3236(self, blocktime):
+        if blocktime > datetime.datetime(3000, 1, 1):
+            self.device.disable()
+            self.temporary_disabled = True
+        else:
+            if self.temporary_disabled:
+                self.device.enable()
+                self.temporary_disabled = False
+
+    def callback_timeout(self):
+        time.sleep(1)
+        print("Timeout occured. Relaunch acquisition.")
+        self.device.start_acquisition(**self.params)
+
+    def callback_files(self):
         files = list(pathlib.Path(".").glob("*.h5"))
         newfiles = [file for file in files if file not in self.oldfiles]
         self.oldfiles.extend(newfiles)
@@ -86,19 +87,22 @@ class Watcher:
         elif len(newfiles) == 1:
             newfile, = newfiles
             self.isnewfile = True
-
-            # Process old file
-            if (self.data_processor is not None) and (self.currentfile is not None):
-                def data_processor(fname):
-                    os.nice(19)
-                    self.data_processor(fname)
-                process = multiprocessing.Process(
-                    target=data_processor, args=(self.currentfile,))
-                process.start()
-
+            self.process_data()
             self.currentfile = newfile
         else:
             raise RuntimeError("Too many new files.")
+        self.info["currentfile"] = self.currentfile
+        if self.currentfile is not None:
+            self.info["currentsize"] = self.currentfile.stat().st_size
+
+    def process_data(self):
+        if (self.data_processor is not None) and (self.currentfile is not None):
+            def _data_processor(fname):
+                os.nice(19)
+                self.data_processor(fname)
+        process = multiprocessing.Process(
+            target=_data_processor, args=(self.currentfile,))
+        process.start()
 
     def log_info(self, error=False):
         fname = str(self.currentfile).replace(".h5", ".log")
