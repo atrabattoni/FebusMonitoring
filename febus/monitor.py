@@ -66,6 +66,7 @@ class Monitor:
         print(".", end="")
 
     def callback_3236(self, blocktime):
+        print("An 3236 error occured.")
         if blocktime > datetime.datetime(3000, 1, 1):
             self.device.disable()
             self.temporary_disabled = True
@@ -73,11 +74,10 @@ class Monitor:
             if self.temporary_disabled:
                 self.device.enable()
                 self.temporary_disabled = False
-        print("An 3236 error occured.")
 
     def callback_timeout(self):
-        time.sleep(1)
         print("A timeout error occured. Relaunching acquisition...")
+        time.sleep(1)
         self.device.start_acquisition(**self.params)
 
     def callback_files(self):
@@ -98,14 +98,14 @@ class Monitor:
             self.info["currentsize"] = self.currentfile.stat().st_size
 
     def process_data(self):
+        print("Processing previous file in the background...")
         if (self.data_processor is not None) and (self.currentfile is not None):
             def target(fname):
                 os.nice(19)
                 self.data_processor(fname)
-        process = multiprocessing.Process(
-            target=target, args=(self.currentfile,))
-        process.start()
-        print("Processing previous file in the background.")
+            process = multiprocessing.Process(
+                target=target, args=(self.currentfile,))
+            process.start()
 
     def log_info(self, error=False):
         fname = str(self.currentfile).replace(".h5", ".log")
