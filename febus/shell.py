@@ -19,7 +19,7 @@ def fsh():
             data_processor = None
         # Start Acquisition
         device = FebusDevice(gps=gps)
-        monitor = Monitor(device, data_processor=data_processor)
+        monitor = Monitor(device, params, data_processor)
         device.start_acquisition(**params)
         device.enable_writings()
         print("To stop the acquisition press CTRL+C.")
