@@ -12,8 +12,8 @@ from .parser import parse
 class Monitor:
 
     def __init__(self, config):
-        self.gps = self.config["server"]["gps"]
-        self.params = self.config["acquisition"]
+        self.gps = config["server"]["gps"]
+        self.params = config["acquisition"]
         module = import_path(config["monitor"]["data_processor"])
         self.data_processor = module.data_processor
         self.loop_duration = 1 / float(self.params["frequency_resolution"])
