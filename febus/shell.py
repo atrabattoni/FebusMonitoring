@@ -9,9 +9,9 @@ def fsh():
     print("Welcome to Febus shell!")
     try:
         # Input settings
-        gps = input_bool("Would you like to use GPS synchronisation ?")
+        gps = input_bool("Would you like to use GPS synchronisation?")
         params = input_params()
-        if input_bool("Would you like to use a data processor ?"):
+        if input_bool("Would you like to use a data processor?"):
             path = input_path("Data processor path")
             module = import_path
             data_processor = module.data_processor
@@ -22,7 +22,8 @@ def fsh():
         monitor = Monitor(device, data_processor=data_processor)
         device.start_acquisition(**params)
         device.enable_writings()
-        print("To stop the acquisition press CTRL+C")
+        print("To stop the acquisition press CTRL+C.")
+        device.server.wait()
     except KeyboardInterrupt:
         if input_bool("Are you sure you want to stop the acquisition?"):
             device.disable_writings()
@@ -31,4 +32,4 @@ def fsh():
             del device
             exit()
         else:
-            print("Resuming acquisition.")
+            print("Resuming acquisition...")

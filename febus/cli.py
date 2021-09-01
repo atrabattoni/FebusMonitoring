@@ -26,7 +26,6 @@ class FebusDevice:
 
     def __init__(self, gps):
         self.gps = gps
-        self.params = None
         cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
         if self.gps:
             cmd.append("gps")
@@ -41,15 +40,15 @@ class FebusDevice:
         self.server.stdout.reconfigure(line_buffering=True, write_through=True)
         atexit.register(self.__del__)
         time.sleep(1)
-        print(f"Server Started {'with GPS' if self.gps else 'without GPS'}")
+        print(f"Server started {'with GPS.' if self.gps else 'without GPS.'}")
 
     def __del__(self):
         try:
             os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
             self.server.wait()
-            print("Server Terminated")
+            print("Server terminated.")
         except ProcessLookupError:
-            pass
+            print("Server already terminated.")
 
     @staticmethod
     def start_acquisition(fiber_length, frequency_resolution,
@@ -71,13 +70,13 @@ class FebusDevice:
             ],
             env=ENV,
         )
-        print("Acquisition Started")
+        print("Acquisition started.")
 
     @staticmethod
     def stop_acquisition():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "stop"]
         subprocess.call(cmd, env=ENV)
-        print("Acquisition Stopped")
+        print("Acquisition stopped.")
 
     @staticmethod
     def get_status():
@@ -102,10 +101,10 @@ class FebusDevice:
     def enable_writings():
         cmd = ["rm", "-f", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
-        print("Writings Enabled")
+        print("Writings enabled.")
 
     @staticmethod
     def disable_writings():
         cmd = ["touch", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
-        print("Writings Disabled")
+        print("Writings disabled.")
