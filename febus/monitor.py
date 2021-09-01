@@ -102,11 +102,12 @@ class Monitor:
         if (self.data_processor is not None) and (self.currentfile is not None):
             def target(fname):
                 os.nice(19)
+                print("Processing file in the background...")
                 self.data_processor(fname)
+                print("File processed.")
             process = multiprocessing.Process(
                 target=target, args=(self.currentfile,))
             process.start()
-            print("Processing file in the background...")
 
     def log_info(self, error=False):
         fname = str(self.currentfile).replace(".h5", ".log")
