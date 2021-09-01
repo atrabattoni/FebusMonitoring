@@ -29,7 +29,7 @@ class Monitor:
         self.device.enable_writings()
         print("To stop the acquisition press CTRL+C.")
         try:
-            for line in self.self.device.server.stdout:
+            for line in self.device.server.stdout:
                 self.callback(line)
         except KeyboardInterrupt:
             self.device.disable_writings()
