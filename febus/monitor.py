@@ -57,6 +57,7 @@ class Monitor:
                 self.callback_files()
 
     def callback_newloop(self):
+        print(".", end="", flush=True)
         if None in self.info.values():
             error = True
         else:
@@ -64,7 +65,6 @@ class Monitor:
         self.log_info(error=error)
         self.dump_info(error=error)
         self.dump_lines(error=error)
-        print(".", end="", flush=True)
 
     def callback_3236(self, blocktime):
         print()
@@ -106,6 +106,7 @@ class Monitor:
     def process_data(self):
         if (self.data_processor is not None) and (self.currentfile is not None):
             print("Processing file in the background...")
+
             def target(fname):
                 os.nice(19)
                 self.data_processor(fname)

@@ -50,7 +50,7 @@ def parse_trigger(line):
 
 
 def parse_block(line):
-    pattern = r"CoProcessing (?P<blockid>\d+) (?P<blocktime>\d*\.?\d*) \|realtime: (?P<realtime>\d*\.?\d*)"
+    pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) (?P<blocktime>\d*\.?\d*) \|realtime: (?P<realtime>\d*\.?\d*)\| \d*\.?\d* -?\d*\.?\d*"
     m = re.match(pattern, line)
     if m is not None:
         blockid = int(m.group("blockid"))
@@ -70,7 +70,7 @@ def parse_writing(line):
 
 
 def parse_coprocessing(line):
-    pattern = r"Coprocessing took (?P<coprocessingtime>\d*\.?\d*) \(seconds\)"
+    pattern = r"###Coprocessing took (?P<coprocessingtime>\d*\.?\d*) \(seconds\)"
     m = re.match(pattern, line)
     if m is not None:
         coprocessingtime = round(float(m.group("coprocessingtime")), 3)
