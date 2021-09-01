@@ -1,9 +1,13 @@
 import cmd
-import importlib.util
-import pathlib
+import time
 
 from .cli import FebusDevice
+from .io import import_path, input_bool, input_params, input_path
 from .watcher import Watcher
+
+
+def fsh():
+    FebusShell().cmdloop()
 
 
 class FebusShell(cmd.Cmd):
@@ -11,23 +15,21 @@ class FebusShell(cmd.Cmd):
     prompt = "(febus) "
 
     def preloop(self):
-
-        print("Welcome to the febus shell.")
-
-        def ask_gps():
-            gps = input("Would you like to use GPS synchronisation ? [y/n]: ")
-            if gps == "y":
-                gps = True
-            elif gps == "n":
-                gps = False
-            else:
-                print("Argument not understood. Must be 'y' or 'n'.")
-                ask_gps()
-            return gps
-
-        self.device = FebusDevice(gps=ask_gps())
-        self.watcher = None
-        self.preloop = super().preloop
+        # Input settings
+        self.gps = input_bool("Would you like to use GPS synchronisation ?")
+        self.params = input_params()
+        if input_bool("Would you like to use a data processor ?"):
+            path = input_path("Data processor path")
+            module = import_path
+            self.data_processor = module.data_processor
+        else:
+            self.data_processor = None
+        # Start Acquisition
+        self.device = FebusDevice(gps=self.gps)
+        self.monitor = Watcher(self.device, data_processor=self.data_processor)
+        self.monitor.start_monitoring()
+        self.device.start_acquisition(**self.params)
+        self.device.enable_writings()
 
     def cmdloop(self, intro=None):
         print(self.intro)
@@ -37,25 +39,6 @@ class FebusShell(cmd.Cmd):
                 break
             except KeyboardInterrupt:
                 print("^C")
-
-    def do_acquisition(self, arg):
-        ""
-        if arg == "start":
-            kwargs = {
-                "fiber_length": int(input("Fiber length [m]: ")),
-                "frequency_resolution": float(input("Frequency resolution [Hz]: ")),
-                "spatial_resolution": int(input("Pulse width [m]: ")),
-                "ampli_power": int(input("Ampli power [dBm]: ")),
-                "cutoff_frequency": int(input("Pulse Frequency [Hz]: ")),
-                "gauge_length": 1,
-                "sampling_resolution": int(input("Sampling resolution [cm]: ")),
-                "pipeline_fname": input("Pipeline path: "),
-            }
-            self.device.start_acquisition(**kwargs)
-        elif arg == "stop":
-            self.device.stop_acquisition()
-        else:
-            print("Argument not understood. Must be 'start' or 'stop'")
 
     def do_status(self, arg):
         ""
@@ -69,32 +52,12 @@ class FebusShell(cmd.Cmd):
 
     def do_writings(self, arg):
         ""
-        if arg == "start":
+        if arg == "enable":
             self.device.enable_writings()
-        elif arg == "stop":
+        elif arg == "disable":
             self.device.disable_writings()
         else:
-            print("Argument not understood. Must be 'start' or 'stop'")
-
-    def do_watcher(self, arg):
-        ""
-        if arg == "start":
-            path = input("Data_processor_path: ")
-            if path:
-                path = pathlib.Path(path)
-                spec = importlib.util.spec_from_file_location(path.name, path)
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                data_processor = module.data_processor
-            else:
-                data_processor = None
-            self.watcher = Watcher(self.device, data_processor=data_processor)
-            self.watcher.start_monitoring()
-        elif arg == "stop":
-            self.watcher.terminate_monitoring()
-            self.watcher = None
-        else:
-            print("Argument not understood. Must be 'start' or 'stop'")
+            print("Argument not understood. Must be 'enable' or 'disable'")
 
     def do_info(self, arg):
         if self.watcher is not None:
@@ -104,8 +67,9 @@ class FebusShell(cmd.Cmd):
             print("Watcher not started.")
 
     def do_exit(self, arg):
+        self.device.disable_writings()
+        time.sleep(1)
+        self.device.stop_acquisition()
+        time.sleep(1)
+        del self.device
         exit()
-
-
-def fsh():
-    FebusShell().cmdloop()
