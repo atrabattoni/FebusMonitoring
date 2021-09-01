@@ -13,7 +13,7 @@ def fsh():
         params = input_params()
         if input_bool("Would you like to use a data processor?"):
             path = input_path("Data processor path")
-            module = import_path
+            module = import_path(path)
             data_processor = module.data_processor
         else:
             data_processor = None
