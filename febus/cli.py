@@ -27,7 +27,7 @@ class FebusDevice:
     def __init__(self, gps):
         self.gps = gps
         cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
-        if self.gps:
+        if self.gps == "yes":
             cmd.append("gps")
         self.server = subprocess.Popen(
             cmd,
@@ -40,7 +40,7 @@ class FebusDevice:
         self.server.stdout.reconfigure(line_buffering=True, write_through=True)
         atexit.register(self.__del__)
         time.sleep(1)
-        print(f"Server started {'with GPS.' if self.gps else 'without GPS.'}")
+        print("Server started.")
 
     def __del__(self):
         try:
@@ -59,13 +59,13 @@ class FebusDevice:
                 "/opt/febus-a1/bin/ClientCli",
                 "-c",
                 "start",
-                "{:d}".format(fiber_length),  # m
-                "{:.1f}".format(frequency_resolution),  # Hz
-                "{:d}".format(spatial_resolution),  # m
-                "{:.1f}".format(ampli_power),  # dBm
-                "{:d}".format(cutoff_frequency),  # Hz
-                "{:d}".format(gauge_length),  # m
-                "{:d}".format(sampling_resolution),  # cm
+                fiber_length,  # m [int]
+                frequency_resolution,  # Hz [float]
+                spatial_resolution,  # m [int]
+                ampli_power,  # dBm [float]
+                cutoff_frequency,  # Hz [int]
+                gauge_length,  # m [int]
+                sampling_resolution,  # cm [int]
                 pipeline,
             ],
             env=ENV,
@@ -95,7 +95,6 @@ class FebusDevice:
             value = value.strip()
             d[key] = value
         return d
-
 
     @staticmethod
     def enable_writings():

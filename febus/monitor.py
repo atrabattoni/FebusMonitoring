@@ -30,12 +30,12 @@ class Monitor:
 
         self.thread = threading.Thread(target=target)
         self.thread.start()
-        print("Monitoring Started")
+        print("Monitoring started.")
 
     def __del__(self):
         self.is_monitoring = False
         self.thread.join()
-        print("Monitoring Terminated")
+        print("Monitoring terminated.")
 
     def monitor(self, line):
         self.stream.append(line)
@@ -64,9 +64,10 @@ class Monitor:
         self.log_info(error=error)
         self.dump_info(error=error)
         self.dump_lines(error=error)
-        print(".", end="")
+        print(".", end="", flush=True)
 
     def callback_3236(self, blocktime):
+        print()
         print("An 3236 error occured.")
         if blocktime > datetime.datetime(3000, 1, 1):
             self.device.disable()
@@ -77,6 +78,7 @@ class Monitor:
                 self.temporary_disabled = False
 
     def callback_timeout(self):
+        print()
         print("A timeout error occured. Relaunching acquisition...")
         time.sleep(1)
         self.device.start_acquisition(**self.params)
@@ -88,12 +90,14 @@ class Monitor:
         if len(newfiles) == 0:
             self.isnewfile = False
         elif len(newfiles) == 1:
+            print()
             newfile, = newfiles
             self.isnewfile = True
             print("New file.")
             self.process_data()
             self.currentfile = newfile
         else:
+            print()
             raise RuntimeError("Too many new files.")
         self.info["currentfile"] = self.currentfile
         if self.currentfile is not None:
