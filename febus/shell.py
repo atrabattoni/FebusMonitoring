@@ -13,10 +13,11 @@ def fsh():
         config = input_config()
         write_config(config)
     elif len(sys.argv) == 2:
-        read_config(sys.argv[1])
+        config = read_config(sys.argv[1])
     else:
         print("Wrong number of arguments. Should be zero for manual parameter "
               "selection, or one to specify the configuration file.")
+        exit()
     # Start Acquisition
     try:
         module = import_path(config["monitor"]["data_processor"])
