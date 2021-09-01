@@ -63,6 +63,7 @@ class Monitor:
         self.log_info(error=error)
         self.dump_info(error=error)
         self.dump_lines(error=error)
+        print(".", end="")
 
     def callback_3236(self, blocktime):
         if blocktime > datetime.datetime(3000, 1, 1):
