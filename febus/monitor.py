@@ -100,9 +100,9 @@ class Monitor:
 
     def process_data(self):
         if (self.data_processor is not None) and (self.currentfile is not None):
+            print("Processing file in the background...")
             def target(fname):
                 os.nice(19)
-                print("Processing file in the background...")
                 self.data_processor(fname)
                 print("File processed.")
             process = multiprocessing.Process(
