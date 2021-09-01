@@ -3,54 +3,58 @@ import multiprocessing
 import os
 import pathlib
 import time
-import threading
 
+from .cli import FebusDevice
+from .io import import_path
 from .parser import parse
 
 
 class Monitor:
 
-    def __init__(self, device, params, data_processor):
-        self.device = device
-        self.params = params
-        self.data_processor = data_processor
+    def __init__(self, config):
+        self.gps = self.config["server"]["gps"]
+        self.params = self.config["acquisition"]
+        module = import_path(config["monitor"]["data_processor"])
+        self.data_processor = module.data_processor
+        self.loop_duration = 1 / float(self.params["frequency_resolution"])
+        self.device = FebusDevice(gps=self.gps)
         self.currentfile = None
         self.oldfiles = list(pathlib.Path(".").glob("*.h5"))
         self.info = {}
         self.stream = []
         self.isnewfile = False
         self.temporary_disabled = False
-        self.is_monitoring = True
-        self.thread = threading.Thread(target=self.monitor)
-        self.thread.start()
-        print("Monitoring started.")
 
-    def monitor(self):
-        for line in self.device.server.stdout:
-            self.stream.append(line)
-            result = parse(line)
-            if isinstance(result, str):
-                if result == "newloop":
-                    if not self.is_monitoring:
-                        return
-                    self.callback_newloop()
-                elif result == "timeout":
-                    self.callback_timeout()
-                else:
-                    print(result)
-                    print(line)
-            if isinstance(result, dict):
-                self.info.update(result)
-                if "blocktime" in result:
-                    blocktime = result["blocktime"]
-                    self.callback_3236(blocktime)
-                if "writingtime" in result:
-                    self.callback_files()
+        self.device.start_acquisition(**self.params)
+        self.device.enable_writings()
+        print("To stop the acquisition press CTRL+C.")
+        try:
+            for line in self.self.device.server.stdout:
+                self.callback(line)
+        except KeyboardInterrupt:
+            self.device.disable_writings()
+            time.sleep(self.loop_duration)
+            self.device.stop_acquisition()
+            exit()
 
-    def __del__(self):
-        self.is_monitoring = False
-        self.thread.join()
-        print("Monitoring terminated.")
+    def callback(self, line):
+        self.stream.append(line)
+        result = parse(line)
+        if isinstance(result, str):
+            if result == "newloop":
+                self.callback_newloop()
+            elif result == "timeout":
+                self.callback_timeout()
+            else:
+                print(result)
+                print(line)
+        if isinstance(result, dict):
+            self.info.update(result)
+            if "blocktime" in result:
+                blocktime = result["blocktime"]
+                self.callback_3236(blocktime)
+            if "writingtime" in result:
+                self.callback_files()
 
     def callback_newloop(self):
         print(".", end="", flush=True)
