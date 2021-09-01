@@ -53,7 +53,7 @@ class FebusDevice:
     @staticmethod
     def start_acquisition(fiber_length, frequency_resolution,
                           spatial_resolution, ampli_power, cutoff_frequency,
-                          gauge_length, sampling_resolution, pipeline_fname):
+                          gauge_length, sampling_resolution, pipeline):
         subprocess.call(
             [
                 "/opt/febus-a1/bin/ClientCli",
@@ -66,7 +66,7 @@ class FebusDevice:
                 "{:d}".format(cutoff_frequency),  # Hz
                 "{:d}".format(gauge_length),  # m
                 "{:d}".format(sampling_resolution),  # cm
-                pipeline_fname,
+                pipeline,
             ],
             env=ENV,
         )
