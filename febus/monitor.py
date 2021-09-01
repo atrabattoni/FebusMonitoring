@@ -67,7 +67,7 @@ class Monitor:
         self.dump_lines(error=error)
 
     def callback_3236(self, blocktime):
-        if blocktime > datetime.datetime(2021, 9, 1, 15, 45):
+        if blocktime > datetime.datetime(3000, 1, 1):
             print()
             print("An 3236 error occured.")
             self.device.disable_writings()

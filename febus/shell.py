@@ -33,9 +33,7 @@ def fsh():
         print()
         if input_bool("Are you sure you want to stop the acquisition?") == "yes":
             device.disable_writings()
-            del monitor
             time.sleep(1 / float(config["acquisition"]["frequency_resolution"]))
-            del device
             exit()
         else:
             print("Resuming acquisition...")
