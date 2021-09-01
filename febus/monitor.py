@@ -89,6 +89,7 @@ class Monitor:
         elif len(newfiles) == 1:
             newfile, = newfiles
             self.isnewfile = True
+            print("New file.")
             self.process_data()
             self.currentfile = newfile
         else:
@@ -98,7 +99,6 @@ class Monitor:
             self.info["currentsize"] = self.currentfile.stat().st_size
 
     def process_data(self):
-        print("Processing previous file in the background...")
         if (self.data_processor is not None) and (self.currentfile is not None):
             def target(fname):
                 os.nice(19)
@@ -106,6 +106,7 @@ class Monitor:
             process = multiprocessing.Process(
                 target=target, args=(self.currentfile,))
             process.start()
+            print("Processing file in the background...")
 
     def log_info(self, error=False):
         fname = str(self.currentfile).replace(".h5", ".log")
