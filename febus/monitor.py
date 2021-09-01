@@ -67,14 +67,15 @@ class Monitor:
         self.dump_lines(error=error)
 
     def callback_3236(self, blocktime):
-        print()
-        print("An 3236 error occured.")
-        if blocktime > datetime.datetime(3000, 1, 1):
-            self.device.disable()
+        if blocktime > datetime.datetime(2021, 9, 1, 15, 45):
+            print()
+            print("An 3236 error occured.")
+            self.device.disable_writings()
             self.temporary_disabled = True
         else:
             if self.temporary_disabled:
-                self.device.enable()
+                print()
+                self.device.enable_writings()
                 self.temporary_disabled = False
 
     def callback_timeout(self):
