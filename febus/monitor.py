@@ -1,13 +1,15 @@
 import datetime
+import itertools
 import multiprocessing
 import os
 import pathlib
+import sys
 import time
 
 from .cli import FebusDevice
 from .io import import_path
 from .parser import parse
-
+    
 
 class Monitor:
 
@@ -24,6 +26,7 @@ class Monitor:
         self.stream = []
         self.isnewfile = False
         self.temporary_disabled = False
+        self.spinner = itertools.cycle(['-', '\\', '|', '/'])
 
         self.device.start_acquisition(**self.params)
         self.device.enable_writings()
@@ -32,7 +35,6 @@ class Monitor:
             for line in self.device.server.stdout:
                 self.callback(line)
         except KeyboardInterrupt:
-            print()
             self.device.disable_writings()
             time.sleep(self.loop_duration)
             self.device.stop_acquisition()
@@ -58,7 +60,9 @@ class Monitor:
                 self.callback_files()
 
     def callback_newloop(self):
-        print(".", end="", flush=True)
+        sys.stdout.write(next(self.spinner)) 
+        sys.stdout.flush()               
+        sys.stdout.write('\b')   
         if None in self.info.values():
             error = True
         else:
@@ -69,18 +73,15 @@ class Monitor:
 
     def callback_3236(self, blocktime):
         if blocktime > datetime.datetime(3000, 1, 1):
-            print()
             print("An 3236 error occured.")
             self.device.disable_writings()
             self.temporary_disabled = True
         else:
             if self.temporary_disabled:
-                print()
                 self.device.enable_writings()
                 self.temporary_disabled = False
 
     def callback_timeout(self):
-        print()
         print("A timeout error occured. Relaunching acquisition...")
         time.sleep(1)
         self.device.start_acquisition(**self.params)
@@ -92,14 +93,12 @@ class Monitor:
         if len(newfiles) == 0:
             self.isnewfile = False
         elif len(newfiles) == 1:
-            print()
             newfile, = newfiles
             self.isnewfile = True
             print("New file.")
             self.process_data()
             self.currentfile = newfile
         else:
-            print()
             raise RuntimeError("Too many new files.")
         self.info["currentfile"] = self.currentfile
         if self.currentfile is not None:
