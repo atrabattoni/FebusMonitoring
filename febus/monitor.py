@@ -32,6 +32,7 @@ class Monitor:
             for line in self.device.server.stdout:
                 self.callback(line)
         except KeyboardInterrupt:
+            print()
             self.device.disable_writings()
             time.sleep(self.loop_duration)
             self.device.stop_acquisition()
