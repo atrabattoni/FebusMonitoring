@@ -71,7 +71,7 @@ class FebusDevice:
             gauge_length,  # m [int]
             sampling_resolution,  # cm [int]
             pipeline,
-        ],
+        ]
         subprocess.call(cmd, env=ENV)
         print("Acquisition started.")
 
