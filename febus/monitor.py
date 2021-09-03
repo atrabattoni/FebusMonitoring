@@ -145,7 +145,7 @@ class FileMonitor:
             return module.data_processor
 
     def process_data(self):
-        if (self.data_processor is not None) and (self.active_file is not None):
+        if (self.data_processor is not None) and (self.current_file is not None):
 
             def target(fname):
                 os.nice(19)
