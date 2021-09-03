@@ -193,12 +193,11 @@ class Stream:
         self.reset()
 
     def reset(self):
-        self.line = []
+        self.lines = []
 
     def update(self, line):
-        self.line.append(line)
+        self.lines.append(line)
 
     def write(self, fname="stream"):
         with open(fname, "w") as file:
             file.writelines(self.lines)
-        self.lines = []
