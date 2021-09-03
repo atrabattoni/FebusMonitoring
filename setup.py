@@ -5,7 +5,7 @@ setup(
     packages=["febus"],
     entry_points={
         "console_scripts": [
-            "fsh = febus.shell:fsh",
+            "FebusMonitor = febus.main:main",
         ],
     },
 )

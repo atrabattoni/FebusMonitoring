@@ -1,4 +1,5 @@
 import datetime
+import importlib.util
 import itertools
 import multiprocessing
 import os
@@ -6,142 +7,196 @@ import pathlib
 import sys
 import time
 
-from .cli import FebusDevice
-from .io import import_path
+from .device import FebusDevice
 from .parser import parse
-    
+
 
 class Monitor:
-
     def __init__(self, config):
-        self.gps = config["server"]["gps"]
-        self.params = config["acquisition"]
-        module = import_path(config["monitor"]["data_processor"])
-        self.data_processor = module.data_processor
-        self.loop_duration = 1 / float(self.params["frequency_resolution"])
-        self.device = FebusDevice(gps=self.gps)
-        self.currentfile = None
-        self.oldfiles = list(pathlib.Path(".").glob("*.h5"))
-        self.info = {}
-        self.stream = []
-        self.isnewfile = False
-        self.temporary_disabled = False
-        self.spinner = itertools.cycle(['-', '\\', '|', '/'])
+        self.config = config
+        gps = self.config["server"]["gps"]
+        data_processor = config["monitor"]["data_processor"]
+        self.device = FebusDevice(gps=gps)
+        self.time_monitor = TimeMonitor()
+        self.file_monitor = FileMonitor(data_processor=data_processor)
+        self.state = State()
+        self.stream = Stream()
 
-        self.device.start_acquisition(**self.params)
+    def setup(self):
+        self.device.start_server()
+        self.device.start_acquisition(**self.config["acquisition"])
         self.device.enable_writings()
+
+    def loop(self):
         print("To stop the acquisition press CTRL+C.")
+        spinner = Spinner()
         try:
             for line in self.device.server.stdout:
-                self.callback(line)
+                result = parse(line)
+                if "newloop" in result:
+                    self.callback_newloop()
+                    spinner.spin()
+                if "timeout" in result:
+                    self.callback_timeout()
+                if "blocktime" in result:
+                    self.time_monitor.monitor(result["blocktime"])
+                if "writingtime" in result:
+                    out = self.file_monitor.monitor()
+                    result.update(out)
+                if "error" in result:
+                    print(line)
+                self.state.update(result)
+                self.stream.update(line)
         except KeyboardInterrupt:
-            self.device.disable_writings()
-            time.sleep(self.loop_duration)
-            self.device.stop_acquisition()
-            exit()
+            print("Monitoring stopped.")
 
-    def callback(self, line):
-        self.stream.append(line)
-        result = parse(line)
-        if isinstance(result, str):
-            if result == "newloop":
-                self.callback_newloop()
-            elif result == "timeout":
-                self.callback_timeout()
-            else:
-                print(result)
-                print(line)
-        if isinstance(result, dict):
-            self.info.update(result)
-            if "blocktime" in result:
-                blocktime = result["blocktime"]
-                self.callback_3236(blocktime)
-            if "writingtime" in result:
-                self.callback_files()
+    def terminate(self):
+        self.device.disable_writings()
+        self.wait()
+        self.device.stop_acquisition()
+
+    def wait(self):
+        frequency_resolution = float(
+            self.config["acquisition"]["frequency_resolution"])
+        loop_duration = 1 / frequency_resolution
+        time.sleep(loop_duration)
 
     def callback_newloop(self):
-        sys.stdout.write(next(self.spinner)) 
-        sys.stdout.flush()               
-        sys.stdout.write('\b')   
-        if None in self.info.values():
-            error = True
+        if self.state.is_complete():
+            self.state.log(
+                str(self.file_monitor.current_file).replace(".h5", ".log"))
+            self.state.write()
+            self.stream.write()
         else:
-            error = False
-        self.log_info(error=error)
-        self.dump_info(error=error)
-        self.dump_lines(error=error)
-
-    def callback_3236(self, blocktime):
-        if blocktime > datetime.datetime(3000, 1, 1):
-            print("An 3236 error occured.")
-            self.device.disable_writings()
-            self.temporary_disabled = True
-        else:
-            if self.temporary_disabled:
-                self.device.enable_writings()
-                self.temporary_disabled = False
+            now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            self.state.write(f"state_{now}")
+            self.stream.write(f"state_{now}")
+        self.state.reset()
+        self.stream.reset()
 
     def callback_timeout(self):
         print("A timeout error occured. Relaunching acquisition...")
-        time.sleep(1)
-        self.device.start_acquisition(**self.params)
+        self.wait()
+        self.device.start_acquisition(**self.config["acquisition"])
 
-    def callback_files(self):
+
+class Spinner:
+    def __init__(self):
+        self.characters = itertools.cycle(['-', '\\', '|', '/'])
+
+    def spin(self):
+        sys.stdout.write(next(self.characters))
+        sys.stdout.flush()
+        sys.stdout.write('\b')
+
+
+class TimeMonitor:
+    def __init__(self):
+        self.temporary_disabled = False
+
+    def monitor(self, blocktime):
+        if blocktime > datetime.datetime(3000, 1, 1):
+            if not self.temporary_disabled:
+                print("GPS is in 3236 state.")
+                self.device.disable_writings()
+                self.temporary_disabled = True
+        else:
+            if self.temporary_disabled:
+                print("GPS time recovered.")
+                self.device.enable_writings()
+                self.temporary_disabled = False
+
+
+class FileMonitor:
+    def __init__(self, data_processor):
+        self.current_file = None
+        self.previous_files = list(pathlib.Path(".").glob("*.h5"))
+        self.data_processor = self.import_data_processor(data_processor)
+
+    def monitor(self):
         files = list(pathlib.Path(".").glob("*.h5"))
-        newfiles = [file for file in files if file not in self.oldfiles]
-        self.oldfiles.extend(newfiles)
-        if len(newfiles) == 0:
-            self.isnewfile = False
-        elif len(newfiles) == 1:
-            newfile, = newfiles
-            self.isnewfile = True
-            print("New file.")
+        new_files = [file for file in files if file not in self.previous_files]
+        self.previous_files.extend(new_files)
+        if len(new_files) == 0:
+            pass
+        elif len(new_files) == 1:
+            newfile, = new_files
+            print(f"New file opened: {newfile}.")
             self.process_data()
-            self.currentfile = newfile
+            self.current_file = newfile
         else:
             raise RuntimeError("Too many new files.")
-        self.info["currentfile"] = self.currentfile
-        if self.currentfile is not None:
-            self.info["currentsize"] = self.currentfile.stat().st_size
+        out = {}
+        out["currentfile"] = self.current_file
+        if self.current_file is not None:
+            out["currentsize"] = self.current_file.stat().st_size
+        return out
+
+    @staticmethod
+    def import_data_processor(path):
+        if path == "no":
+            return None
+        else:
+            spec = importlib.util.spec_from_file_location(path, path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module.data_processor
 
     def process_data(self):
-        if (self.data_processor is not None) and (self.currentfile is not None):
-            print("Processing file in the background...")
+        if (self.data_processor is not None) and (self.active_file is not None):
 
             def target(fname):
                 os.nice(19)
                 self.data_processor(fname)
-                print("File processed.")
-            process = multiprocessing.Process(
-                target=target, args=(self.currentfile,))
-            process.start()
+                print(f"File {self.current_file} processed.")
 
-    def log_info(self, error=False):
-        fname = str(self.currentfile).replace(".h5", ".log")
-        if error:
-            fname = fname.replace(".log", "_error.log")
+            process = multiprocessing.Process(
+                target=target, args=(self.current_file,))
+            process.start()
+            print(f"Processing {self.current_file} in the background...")
+
+
+class State:
+    def __init__(self):
+        self.keys = ["walltime", "pulseid", "pulsetime", "trigid", "blockid",
+                     "blocktime", "realtime", "writingtime", "currentfile",
+                     "currentsize", "coprocessingtime"]
+        self.reset()
+
+    def reset(self):
+        self.state = dict.fromkeys(self.keys)
+
+    def update(self, d):
+        self.state.update({key: d[key] for key in self.keys if key in d})
+
+    def is_complete(self):
+        return (None not in self.state.values())
+
+    def write(self, fname="state"):
+        with open(fname, "w") as file:
+            for key, item in self.state.items():
+                file.write(f"{key}: {item}\n")
+
+    def log(self, fname):
         sep = ","
         with open(fname, "a") as file:
-            if self.isnewfile:
-                file.write(sep.join(self.info.keys()) + "\n")
-            values = [str(value) for value in self.info.values()]
+            if file.tell() == 0:
+                file.write(sep.join(self.state.keys()) + "\n")
+            values = [str(value) for value in self.state.values()]
             file.write(sep.join(values) + "\n")
 
-    def dump_info(self, error=False):
-        fname = "info"
-        if error:
-            now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            fname += f"_error_{now}"
-        with open(fname, "w") as file:
-            for key, item in self.info.items():
-                file.write(f"{key}: {item}\n")
-                self.info[key] = None
 
-    def dump_lines(self, error=False):
-        fname = "stream"
-        if error:
-            now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            fname += f"_error_{now}"
+class Stream:
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.line = []
+
+    def update(self, line):
+        self.line.append(line)
+
+    def write(self, fname="stream"):
         with open(fname, "w") as file:
-            file.writelines(self.stream)
-        self.stream = []
+            file.writelines(self.lines)
+        self.lines = []

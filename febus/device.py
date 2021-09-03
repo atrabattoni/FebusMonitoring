@@ -25,24 +25,31 @@ STOP_WRITINGS_PATH = "/home/febus/.hdf5_stop_writings"
 class FebusDevice:
 
     def __init__(self, gps):
+        if not gps in ["yes", "no"]:
+            print("Wrong GPS argument. Must be 'yes' or 'no'.")
         self.gps = gps
+
+    def start_server(self):
         cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
         if self.gps == "yes":
             cmd.append("gps")
+            print("Enabling GPS.")
+        else:
+            print("Disabling GPS.")
         self.server = subprocess.Popen(
             cmd,
             bufsize=1,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            text=True,
             preexec_fn=os.setsid,
+            text=True,
         )
         self.server.stdout.reconfigure(line_buffering=True, write_through=True)
-        atexit.register(self.__del__)
-        time.sleep(1)
+        atexit.register(self.terminate_server)
+        time.sleep(3)
         print("Server started.")
 
-    def __del__(self):
+    def terminate_server(self):
         try:
             os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
             self.server.wait()
@@ -54,22 +61,18 @@ class FebusDevice:
     def start_acquisition(fiber_length, frequency_resolution,
                           spatial_resolution, ampli_power, cutoff_frequency,
                           gauge_length, sampling_resolution, pipeline):
-        subprocess.call(
-            [
-                "/opt/febus-a1/bin/ClientCli",
-                "-c",
-                "start",
-                fiber_length,  # m [int]
-                frequency_resolution,  # Hz [float]
-                spatial_resolution,  # m [int]
-                ampli_power,  # dBm [float]
-                cutoff_frequency,  # Hz [int]
-                gauge_length,  # m [int]
-                sampling_resolution,  # cm [int]
-                pipeline,
-            ],
-            env=ENV,
-        )
+        cmd = [
+            "/opt/febus-a1/bin/ClientCli", "-c", "start",
+            fiber_length,  # m [int]
+            frequency_resolution,  # Hz [float]
+            spatial_resolution,  # m [int]
+            ampli_power,  # dBm [float]
+            cutoff_frequency,  # Hz [int]
+            gauge_length,  # m [int]
+            sampling_resolution,  # cm [int]
+            pipeline,
+        ],
+        subprocess.call(cmd, env=ENV)
         print("Acquisition started.")
 
     @staticmethod

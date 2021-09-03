@@ -15,12 +15,12 @@ def parse(line):
 def parse_error(line):
     s = re.search(r"error", line, re.IGNORECASE)
     if s is not None:
-        return "error"
+        return {"error": True}
 
 
 def parse_newloop(line):
     if "New loop" in line:
-        return "newloop"
+        return {"newloop": True}
 
 
 def parse_walltime(line):
@@ -80,4 +80,4 @@ def parse_coprocessing(line):
 def parse_timeout(line):
     pattern = "A timeout occurred while waiting for trigger during TSR acquisition"
     if pattern in line:
-        return "timeout"
+        return {"timeout": True}
