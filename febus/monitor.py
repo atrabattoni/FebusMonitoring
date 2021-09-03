@@ -33,6 +33,8 @@ class Monitor:
         try:
             for line in self.device.server.stdout:
                 result = parse(line)
+                if result is None:
+                    continue
                 if "newloop" in result:
                     self.callback_newloop()
                     spinner.spin()
