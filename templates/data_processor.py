@@ -12,4 +12,3 @@ def data_processor(fname):
     xarr.to_netcdf(drive / fname.with_suffix(".nc"))
     shutil.move(fname.with_suffix(".log"), drive / fname.with_suffix(".log"))
     fname.unlink()
-    print(fname)

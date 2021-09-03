@@ -72,7 +72,7 @@ class Monitor:
         else:
             now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
             self.state.write(f"state_{now}")
-            self.stream.write(f"state_{now}")
+            self.stream.write(f"stream_{now}")
         self.state.reset()
         self.stream.reset()
 
