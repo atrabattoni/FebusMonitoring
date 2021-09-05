@@ -32,6 +32,7 @@ class Monitor:
         spinner = Spinner()
         try:
             for line in self.device.server.stdout:
+                self.stream.update(line)
                 result = parse(line)
                 if result is None:
                     continue
@@ -48,7 +49,6 @@ class Monitor:
                 if "error" in result:
                     print(line)
                 self.state.update(result)
-                self.stream.update(line)
         except KeyboardInterrupt:
             print("Monitoring stopped.")
 
