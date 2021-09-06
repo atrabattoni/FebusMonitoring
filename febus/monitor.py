@@ -60,8 +60,8 @@ class Monitor:
         self.device.disable_writings()
         self.wait_loop()
         self.device.stop_acquisition()
-        self.device.stop_server()
-        # self.file_monitor.process_data()
+        self.device.terminate_server()
+        self.file_monitor.process_data()
         print("Thanks for using FebusMonitoring!")
 
     def wait_loop(self):
