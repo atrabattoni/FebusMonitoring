@@ -1,11 +1,11 @@
 import datetime
 import importlib.util
 import itertools
-import multiprocessing
 import os
-import pathlib
 import sys
 import time
+from multiprocessing import Process
+from pathlib import Path
 
 from .device import FebusDevice
 from .parser import parse
@@ -30,27 +30,31 @@ class Monitor:
     def loop(self):
         print("To stop the acquisition press CTRL+C.")
         spinner = Spinner()
-        try:
-            for line in self.device.server.stdout:
-                self.stream.update(line)
-                result = parse(line)
-                if result is None:
-                    continue
-                if "newloop" in result:
-                    self.callback_newloop()
-                    spinner.spin()
-                if "timeout" in result:
-                    self.callback_timeout()
-                if "blocktime" in result:
-                    self.time_monitor.monitor(result["blocktime"])
-                if "writingtime" in result:
-                    out = self.file_monitor.monitor()
-                    result.update(out)
-                if "error" in result:
-                    print(line)
-                self.state.update(result)
-        except KeyboardInterrupt:
-            print("Monitoring stopped.")
+        while True:
+            try:
+                line = self.device.get_line()
+                if line is not None:
+                    self.stream.update(line)
+                    result = parse(line)
+                    if result is None:
+                        continue
+                    if "newloop" in result:
+                        self.callback_newloop()
+                        spinner.spin()
+                    if "timeout" in result:
+                        self.callback_timeout()
+                    if "blocktime" in result:
+                        self.time_monitor.monitor(result["blocktime"])
+                    if "writingtime" in result:
+                        out = self.file_monitor.monitor()
+                        result.update(out)
+                    if "error" in result:
+                        print(line)
+                    self.state.update(result)
+                else:
+                    time.sleep(0.001)
+            except KeyboardInterrupt:
+                print("Monitoring stopped.")
 
     def terminate(self):
         self.device.disable_writings()
@@ -112,11 +116,11 @@ class TimeMonitor:
 class FileMonitor:
     def __init__(self, data_processor):
         self.current_file = None
-        self.previous_files = list(pathlib.Path(".").glob("*.h5"))
+        self.previous_files = list(Path(".").glob("*.h5"))
         self.data_processor = self.import_data_processor(data_processor)
 
     def monitor(self):
-        files = list(pathlib.Path(".").glob("*.h5"))
+        files = list(Path(".").glob("*.h5"))
         new_files = [file for file in files if file not in self.previous_files]
         self.previous_files.extend(new_files)
         if len(new_files) == 0:
@@ -152,8 +156,7 @@ class FileMonitor:
                 self.data_processor(fname)
                 print(f"File {self.current_file} processed.")
 
-            process = multiprocessing.Process(
-                target=target, args=(self.current_file,))
+            process = Process(target=target, args=(self.current_file,))
             process.start()
             print(f"Processing {self.current_file} in the background...")
 

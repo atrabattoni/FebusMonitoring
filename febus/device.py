@@ -3,6 +3,8 @@ import os
 import signal
 import subprocess
 import time
+from queue import Empty, Queue
+from threading import Thread
 
 # Set environment for ClientCli
 KEY = "LD_LIBRARY_PATH"
@@ -45,6 +47,14 @@ class FebusDevice:
             text=True,
         )
         self.server.stdout.reconfigure(line_buffering=True, write_through=True)
+        self.queue = Queue()
+
+        def enqueue():
+            for line in self.device.server.stdout:
+                self.queue.put(line)
+
+        self.thread = Thread(target=enqueue, daemon=True)
+        self.thread.start()
         atexit.register(self.terminate_server)
         time.sleep(3)
         print("Server started.")
@@ -56,6 +66,12 @@ class FebusDevice:
             print("Server terminated.")
         except ProcessLookupError:
             print("Server already terminated.")
+
+    def get_line(self):
+        try:
+            return self.queue.get_nowait()
+        except Empty:
+            return None
 
     @staticmethod
     def start_acquisition(fiber_length, frequency_resolution,
