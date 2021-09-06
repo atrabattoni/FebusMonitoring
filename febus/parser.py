@@ -5,7 +5,7 @@ import re
 def parse(line):
     parsers = [parse_newloop, parse_walltime, parse_pulse, parse_trigger,
                parse_block, parse_writing, parse_coprocessing, parse_timeout,
-               parse_error]
+               parse_ready, parse_error]
     out = {}
     for parser in parsers:
         out.update(parser(line))
@@ -97,5 +97,13 @@ def parse_timeout(line):
     pattern = "A timeout occurred while waiting for trigger during TSR acquisition"
     if pattern in line:
         return {"timeout": True}
+    else:
+        return {}
+
+
+def parse_ready(line):
+    pattern = "Starting Acquisition driver 1 build recette2-591-g18b8"
+    if pattern in line:
+        return {"ready": True}
     else:
         return {}

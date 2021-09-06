@@ -24,6 +24,7 @@ class Monitor:
 
     def setup(self):
         self.device.start_server()
+        self.wait_ready()
         self.device.start_acquisition(**self.config["acquisition"])
         self.device.enable_writings()
 
@@ -34,21 +35,21 @@ class Monitor:
             try:
                 line = self.device.get_line()
                 if line is not None:
-                    result = parse(line)
-                    if "newloop" in result:
+                    info = parse(line)
+                    if "newloop" in info:
                         self.callback_newloop()
                         spinner.spin()
-                    if "timeout" in result:
+                    if "timeout" in info:
                         self.callback_timeout()
-                    if "blocktime" in result:
-                        self.time_monitor.monitor(result["blocktime"])
-                    if "writingtime" in result:
+                    if "blocktime" in info:
+                        self.time_monitor.monitor(info["blocktime"])
+                    if "writingtime" in info:
                         out = self.file_monitor.monitor()
-                        result.update(out)
-                    if "error" in result:
+                        info.update(out)
+                    if "error" in info:
                         print(line)
                     self.stream.update(line)
-                    self.state.update(result)
+                    self.state.update(info)
                 else:
                     time.sleep(0.001)
             except KeyboardInterrupt:
@@ -56,14 +57,26 @@ class Monitor:
 
     def terminate(self):
         self.device.disable_writings()
-        self.wait()
+        self.wait_loop()
         self.device.stop_acquisition()
 
-    def wait(self):
+    def wait_loop(self):
         frequency_resolution = float(
             self.config["acquisition"]["frequency_resolution"])
         loop_duration = 1 / frequency_resolution
         time.sleep(loop_duration)
+
+    def wait_ready(self):
+        is_ready = False
+        while is_ready:
+            line = self.device.get_line()
+            if line is not None:
+                info = parse(line)
+                if "ready" in info:
+                    is_ready = True
+            else:
+                time.sleep(0.001)
+        print("Server is ready.")
 
     def callback_newloop(self):
         if self.state.is_complete():
@@ -80,7 +93,7 @@ class Monitor:
 
     def callback_timeout(self):
         print("A timeout error occured. Relaunching acquisition...")
-        self.wait()
+        self.wait_loop()
         self.device.start_acquisition(**self.config["acquisition"])
 
 

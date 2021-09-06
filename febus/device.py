@@ -2,7 +2,6 @@ import atexit
 import os
 import signal
 import subprocess
-import time
 from queue import Empty, Queue
 from threading import Thread
 
@@ -56,7 +55,6 @@ class FebusDevice:
         self.thread = Thread(target=enqueue, daemon=True)
         self.thread.start()
         atexit.register(self.terminate_server)
-        time.sleep(3)
         print("Server started.")
 
     def terminate_server(self):
