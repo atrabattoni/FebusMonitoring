@@ -32,8 +32,8 @@ class Monitor:
     def loop(self):
         print("To stop the acquisition press CTRL+C.")
         spinner = Spinner()
-        while True:
-            try:
+        try:
+            while True:
                 line = self.device.get_line()
                 if line is not None:
                     info = parse(line)
@@ -53,8 +53,8 @@ class Monitor:
                     self.state.update(info)
                 else:
                     time.sleep(0.001)
-            except KeyboardInterrupt:
-                logging.info("Monitoring stopped.")
+        except KeyboardInterrupt:
+            logging.info("Monitoring stopped.")
 
     def terminate(self):
         self.device.disable_writings()
