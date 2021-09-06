@@ -1,6 +1,7 @@
 import datetime
 import importlib.util
 import itertools
+import logging
 import os
 import sys
 import time
@@ -47,13 +48,13 @@ class Monitor:
                         out = self.file_monitor.monitor()
                         info.update(out)
                     if "error" in info:
-                        print(line)
+                        logging.info(line)
                     self.stream.update(line)
                     self.state.update(info)
                 else:
                     time.sleep(0.001)
             except KeyboardInterrupt:
-                print("Monitoring stopped.")
+                logging.info("Monitoring stopped.")
 
     def terminate(self):
         self.device.disable_writings()
@@ -76,7 +77,7 @@ class Monitor:
                     is_ready = True
             else:
                 time.sleep(0.001)
-        print("Server is ready.")
+        logging.info("Server is ready.")
 
     def callback_newloop(self):
         if self.state.is_complete():
@@ -92,7 +93,7 @@ class Monitor:
         self.stream.reset()
 
     def callback_timeout(self):
-        print("A timeout error occured. Relaunching acquisition...")
+        logging.info("A timeout error occured. Relaunching acquisition...")
         self.wait_loop()
         self.device.start_acquisition(**self.config["acquisition"])
 
@@ -114,12 +115,12 @@ class TimeMonitor:
     def monitor(self, blocktime):
         if blocktime > datetime.datetime(3000, 1, 1):
             if not self.temporary_disabled:
-                print("GPS is in 3236 state.")
+                logging.info("GPS is in 3236 state.")
                 self.device.disable_writings()
                 self.temporary_disabled = True
         else:
             if self.temporary_disabled:
-                print("GPS time recovered.")
+                logging.info("GPS time recovered.")
                 self.device.enable_writings()
                 self.temporary_disabled = False
 
@@ -138,7 +139,7 @@ class FileMonitor:
             pass
         elif len(new_files) == 1:
             newfile, = new_files
-            print(f"New file opened: {newfile}.")
+            logging.info(f"New file opened: {newfile}.")
             self.process_data()
             self.current_file = newfile
         else:
@@ -165,11 +166,11 @@ class FileMonitor:
             def target(fname):
                 os.nice(19)
                 self.data_processor(fname)
-                print(f"File {self.current_file} processed.")
+                logging.info(f"File {self.current_file} processed.")
 
             process = Process(target=target, args=(self.current_file,))
             process.start()
-            print(f"Processing {self.current_file} in the background...")
+            logging.info(f"Processing {self.current_file} in the background...")
 
 
 class State:

@@ -1,10 +1,13 @@
 from configparser import ConfigParser
+import logging
 
 from .monitor import Monitor
 
 
 def main():
     print("Welcome to the Febus Monitoring Tool!")
+    print("Logging information can be found in the 'log' file.")
+    logging.basicConfig(filename='log', format='%(asctime)s: %(message)s')
     config = get_config()
     monitor = Monitor(config)
     monitor.setup()
@@ -16,8 +19,8 @@ def get_config():
     try:
         config = ConfigParser()
         config.read("config")
-        print("Config file loaded.")
+        logging.info("Config file loaded.")
         return config
     except FileNotFoundError:
-        print("Config file not found.")
+        logging.info("Config file not found.")
         exit()

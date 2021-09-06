@@ -1,4 +1,5 @@
 import atexit
+import logging
 import os
 import signal
 import subprocess
@@ -27,16 +28,16 @@ class FebusDevice:
 
     def __init__(self, gps):
         if not gps in ["yes", "no"]:
-            print("Wrong GPS argument. Must be 'yes' or 'no'.")
+            logging.info("Wrong GPS argument. Must be 'yes' or 'no'.")
         self.gps = gps
 
     def start_server(self):
         cmd = ["stdbuf", "-oL", "-eL", "/opt/febus-a1/bin/run-server.sh"]
         if self.gps == "yes":
             cmd.append("gps")
-            print("Enabling GPS.")
+            logging.info("Enabling GPS.")
         else:
-            print("Disabling GPS.")
+            logging.info("Disabling GPS.")
         self.server = subprocess.Popen(
             cmd,
             bufsize=1,
@@ -55,15 +56,15 @@ class FebusDevice:
         self.thread = Thread(target=enqueue, daemon=True)
         self.thread.start()
         atexit.register(self.terminate_server)
-        print("Server started.")
+        logging.info("Server started.")
 
     def terminate_server(self):
         try:
             os.killpg(os.getpgid(self.server.pid), signal.SIGTERM)
             self.server.wait()
-            print("Server terminated.")
+            logging.info("Server terminated.")
         except ProcessLookupError:
-            print("Server already terminated.")
+            logging.info("Server already terminated.")
 
     def get_line(self):
         try:
@@ -87,13 +88,13 @@ class FebusDevice:
             pipeline,
         ]
         subprocess.call(cmd, env=ENV)
-        print("Acquisition started.")
+        logging.info("Acquisition started.")
 
     @staticmethod
     def stop_acquisition():
         cmd = ["/opt/febus-a1/bin/ClientCli", "-c", "stop"]
         subprocess.call(cmd, env=ENV)
-        print("Acquisition stopped.")
+        logging.info("Acquisition stopped.")
 
     @staticmethod
     def get_status():
@@ -117,10 +118,10 @@ class FebusDevice:
     def enable_writings():
         cmd = ["rm", "-f", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
-        print("Writings enabled.")
+        logging.info("Writings enabled.")
 
     @staticmethod
     def disable_writings():
         cmd = ["touch", STOP_WRITINGS_PATH]
         subprocess.call(cmd)
-        print("Writings disabled.")
+        logging.info("Writings disabled.")

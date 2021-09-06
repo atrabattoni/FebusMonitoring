@@ -1,7 +1,9 @@
-import warnings
+import logging
 import pathlib
-import daspy.io
 import shutil
+import warnings
+
+import daspy.io
 
 
 def data_processor(fname):
@@ -14,4 +16,4 @@ def data_processor(fname):
         shutil.move(fname.with_suffix(".log"), drive / fname.with_suffix(".log"))
         fname.unlink()
     except OSError as error:
-        print(error)
+        logging.info(error)
