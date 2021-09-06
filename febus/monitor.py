@@ -73,6 +73,7 @@ class Monitor:
         is_ready = False
         while is_ready:
             line = self.device.get_line()
+            self.stream.update(line)
             if line is not None:
                 info = parse(line)
                 if "ready" in info:
