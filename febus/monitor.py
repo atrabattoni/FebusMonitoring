@@ -81,6 +81,7 @@ class Monitor:
             else:
                 time.sleep(0.001)
         logging.info("Server is ready.")
+        time.sleep(1)
 
     def callback_newloop(self):
         if self.state.is_complete():
