@@ -47,8 +47,8 @@ class Monitor:
                     if "writingtime" in info:
                         out = self.file_monitor.monitor()
                         info.update(out)
-                    if "error" in info:
-                        logging.info(line)
+                    if "serial" in info:
+                        logging.info("Serial execution error.")
                     self.stream.update(line)
                     self.state.update(info)
                 else:

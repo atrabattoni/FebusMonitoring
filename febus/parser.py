@@ -107,3 +107,11 @@ def parse_ready(line):
         return {"ready": True}
     else:
         return {}
+
+
+def parse_serial(line):
+    pattern = "DEBUG : serial execution error"
+    if pattern in line:
+        return {"serial": True}
+    else:
+        return {}
