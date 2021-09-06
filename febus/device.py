@@ -50,7 +50,7 @@ class FebusDevice:
         self.queue = Queue()
 
         def enqueue():
-            for line in self.device.server.stdout:
+            for line in self.server.stdout:
                 self.queue.put(line)
 
         self.thread = Thread(target=enqueue, daemon=True)
