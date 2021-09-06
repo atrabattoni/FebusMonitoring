@@ -6,21 +6,25 @@ def parse(line):
     parsers = [parse_newloop, parse_walltime, parse_pulse, parse_trigger,
                parse_block, parse_writing, parse_coprocessing, parse_timeout,
                parse_error]
+    out = {}
     for parser in parsers:
-        out = parser(line)
-        if out is not None:
-            return out
+        out.update(parser(line))
+    return out
 
 
 def parse_error(line):
     s = re.search(r"error", line, re.IGNORECASE)
     if s is not None:
         return {"error": True}
+    else:
+        return {}
 
 
 def parse_newloop(line):
     if "New loop" in line:
         return {"newloop": True}
+    else:
+        return {}
 
 
 def parse_walltime(line):
@@ -29,6 +33,8 @@ def parse_walltime(line):
     if m is not None:
         walltime = round(float(m.group("walltime")), 3)
         return {"walltime": walltime}
+    else:
+        return {}
 
 
 def parse_pulse(line):
@@ -39,6 +45,8 @@ def parse_pulse(line):
         pulsetime = int(m.group("pulsetime"))
         pulsetime = datetime.datetime.utcfromtimestamp(pulsetime)
         return {"pulseid": pulseid, "pulsetime": pulsetime}
+    else:
+        return {}
 
 
 def parse_trigger(line):
@@ -47,6 +55,8 @@ def parse_trigger(line):
     if m is not None:
         trigid = int(m.group("trigid"))
         return {"trigid": trigid}
+    else:
+        return {}
 
 
 def parse_block(line):
@@ -59,6 +69,8 @@ def parse_block(line):
         blocktime = datetime.datetime.utcfromtimestamp(blocktime)
         realtime = datetime.datetime.utcfromtimestamp(realtime)
         return {"blockid": blockid, "blocktime": blocktime, "realtime": realtime}
+    else:
+        return {}
 
 
 def parse_writing(line):
@@ -67,6 +79,8 @@ def parse_writing(line):
     if m is not None:
         writingtime = round(float(m.group("writingtime")) / 1000, 3)
         return {"writingtime": writingtime}
+    else:
+        return {}
 
 
 def parse_coprocessing(line):
@@ -75,9 +89,13 @@ def parse_coprocessing(line):
     if m is not None:
         coprocessingtime = round(float(m.group("coprocessingtime")), 3)
         return {"coprocessingtime": coprocessingtime}
+    else:
+        return {}
 
 
 def parse_timeout(line):
     pattern = "A timeout occurred while waiting for trigger during TSR acquisition"
     if pattern in line:
         return {"timeout": True}
+    else:
+        return {}

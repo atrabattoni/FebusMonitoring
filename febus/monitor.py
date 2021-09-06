@@ -34,10 +34,7 @@ class Monitor:
             try:
                 line = self.device.get_line()
                 if line is not None:
-                    self.stream.update(line)
                     result = parse(line)
-                    if result is None:
-                        continue
                     if "newloop" in result:
                         self.callback_newloop()
                         spinner.spin()
@@ -50,6 +47,7 @@ class Monitor:
                         result.update(out)
                     if "error" in result:
                         print(line)
+                    self.stream.update(line)
                     self.state.update(result)
                 else:
                     time.sleep(0.001)
