@@ -56,7 +56,7 @@ class FebusDevice:
         self.thread = Thread(target=enqueue, daemon=True)
         self.thread.start()
         atexit.register(self.terminate_server)
-        logging.info("Server started.")
+        logging.info("Starting server...")
 
     def terminate_server(self):
         try:
@@ -67,10 +67,7 @@ class FebusDevice:
             logging.info("Server already terminated.")
 
     def get_line(self):
-        try:
-            return self.queue.get_nowait()
-        except Empty:
-            return None
+        return self.queue.get_nowait()
 
     @staticmethod
     def start_acquisition(fiber_length, frequency_resolution,
@@ -88,7 +85,7 @@ class FebusDevice:
             pipeline,
         ]
         subprocess.call(cmd, env=ENV)
-        logging.info("Acquisition started.")
+        logging.info("Starting acquisition...")
 
     @staticmethod
     def stop_acquisition():

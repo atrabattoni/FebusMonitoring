@@ -14,6 +14,7 @@ def main():
     monitor.setup()
     monitor.loop()
     monitor.terminate()
+    print("Thanks for using FebusMonitoring!")
 
 
 def get_config():

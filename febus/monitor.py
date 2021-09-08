@@ -1,12 +1,13 @@
-import datetime
 import importlib.util
 import itertools
 import logging
 import os
 import sys
-import time
+from datetime import datetime
 from multiprocessing import Process
 from pathlib import Path
+from queue import Empty
+from time import sleep, time
 
 from .device import FebusDevice
 from .parser import parse
@@ -17,16 +18,18 @@ class Monitor:
         self.config = config
         gps = self.config["server"]["gps"]
         data_processor = config["monitor"]["data_processor"]
+        self.loop_duration = 1 / float(
+            self.config["acquisition"]["frequency_resolution"])
         self.device = FebusDevice(gps=gps)
-        self.time_monitor = TimeMonitor()
+        self.timeout_monitor = TimeoutMonitor(10 * self.loop_duration)
+        self.blocktime_monitor = BlockTimeMonitor()
         self.file_monitor = FileMonitor(data_processor=data_processor)
         self.state = State()
         self.stream = Stream()
 
     def setup(self):
-        self.device.start_server()
-        self.wait_ready()
-        self.device.start_acquisition(**self.config["acquisition"])
+        self.secure_start_server()
+        self.secure_start_acquisition()
         self.device.enable_writings()
 
     def loop(self):
@@ -34,16 +37,20 @@ class Monitor:
         spinner = Spinner()
         try:
             while True:
-                line = self.device.get_line()
-                if line is not None:
+                try:
+                    line = self.device.get_line()
+                except Empty:
+                    sleep(0.001)
+                else:
                     info = parse(line)
                     if "newloop" in info:
-                        self.callback_newloop()
                         spinner.spin()
+                        self.timeout_monitor.update()
+                        self.callback_newloop()
                     if "timeout" in info:
-                        self.callback_timeout()
+                        self.secure_restart_acquisition()
                     if "blocktime" in info:
-                        self.time_monitor.monitor(info["blocktime"])
+                        self.blocktime_monitor.monitor(info["blocktime"])
                     if "writingtime" in info:
                         out = self.file_monitor.monitor()
                         info.update(out)
@@ -51,38 +58,85 @@ class Monitor:
                         logging.info("Serial execution error.")
                     self.stream.update(line)
                     self.state.update(info)
-                else:
-                    time.sleep(0.001)
+                finally:
+                    if self.timeout_monitor.is_deep_timeout:
+                        self.secure_restart_all()
+                    if self.timeout_monitor.is_timeout:
+                        self.secure_restart_acquisition()
         except KeyboardInterrupt:
             logging.info("Monitoring stopped.")
 
     def terminate(self):
         self.device.disable_writings()
-        self.wait_loop()
+        self.wait_loop_duration()
         self.device.stop_acquisition()
         self.device.terminate_server()
         self.file_monitor.process_data()
-        print("Thanks for using FebusMonitoring!")
 
-    def wait_loop(self):
-        frequency_resolution = float(
-            self.config["acquisition"]["frequency_resolution"])
-        loop_duration = 1 / frequency_resolution
-        time.sleep(loop_duration)
+    def wait_loop_duration(self):
+        sleep(self.loop_duration)
 
-    def wait_ready(self):
+    def wait_for(self, key, timeout):
+        start_time = time()
         is_ready = False
-        while is_ready:
-            line = self.device.get_line()
-            self.stream.update(line)
-            if line is not None:
-                info = parse(line)
-                if "ready" in info:
-                    is_ready = True
+        while (not is_ready):
+            try:
+                line = self.device.get_line()
+            except Empty:
+                sleep(0.001)
             else:
-                time.sleep(0.001)
-        logging.info("Server is ready.")
-        time.sleep(1)
+                self.stream.update(line)
+                if line is not None:
+                    info = parse(line)
+                    if key in info:
+                        is_ready = True
+            finally:
+                elapsed_time = time() - start_time()
+                if elapsed_time > timeout:
+                    raise TimeoutError
+
+    def secure_start_server(self, timeout=10, trials=3):
+        if trials == 0:
+            logging.info("Could not start server.")
+            raise TimeoutError
+        else:
+            self.device.start_server()
+            logging.info("Waiting for server...")
+            try:
+                self.wait_for("ready", timeout)
+            except TimeoutError:
+                logging.info("Server did not start. Relaunching.")
+                self.device.terminate_server()
+                self.secure_start_server(timeout=timeout, trials=trials-1)
+            else:
+                logging.info("Server is ready.")
+
+    def secure_start_acquisition(self, timeout=60, trials=3):
+        if trials == 0:
+            logging.info("Could not start acquisition.")
+            raise TimeoutError
+        else:
+            self.device.start_acquisition(**self.config["acquisition"])
+            logging.info("Waiting for acquisition...")
+            try:
+                self.wait_for("newloop", timeout)
+            except TimeoutError:
+                logging.info("Acquisition did not start.")
+                self.device.stop_acquisition(**self.config["acquisition"])
+                self.secure_start_server(timeout=timeout, trials=trials-1)
+            else:
+                logging.info("Acquisition is started.")
+
+    def secure_restart_all(self):
+        self.terminate()
+        self.wait_loop_duration()
+        self.setup()
+
+    def secure_restart_acquisition(self):
+        logging.info("A timeout error occured. Relaunching acquisition...")
+        self.device.stop_acquisition()
+        self.wait_loop_duration()
+        self.secure_start_acquisition()
 
     def callback_newloop(self):
         if self.state.is_complete():
@@ -91,16 +145,17 @@ class Monitor:
             self.state.write()
             self.stream.write()
         else:
-            now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            self.state.write(f"state_{now}")
-            self.stream.write(f"stream_{now}")
+            now = datetime.now()
+            self.state.write(f"state_{now}".replace(" ", "T"))
+            self.stream.write(f"stream_{now}".replace(" ", "T"))
         self.state.reset()
         self.stream.reset()
 
-    def callback_timeout(self):
-        logging.info("A timeout error occured. Relaunching acquisition...")
-        self.wait_loop()
-        self.device.start_acquisition(**self.config["acquisition"])
+    def callback_deep_timeout(self):
+        logging.info("A deep timeout error occured. Relaunching server...")
+        self.terminate()
+        self.wait_loop_duration()
+        self.setup()
 
 
 class Spinner:
@@ -113,12 +168,37 @@ class Spinner:
         sys.stdout.write('\b')
 
 
-class TimeMonitor:
+class TimeoutMonitor:
+    def __init__(self, timeout=10, deep_timeout=60):
+        self.timeout = timeout
+        self.deep_timeout = deep_timeout
+        self.last_update = None
+
+    def update(self):
+        self.last_update = time()
+
+    @property
+    def elapsed(self):
+        if self.last_update is not None:
+            return time() - self.last_update
+        else:
+            return 0
+
+    @property
+    def is_timeout(self):
+        return self.elapsed > self.timeout
+
+    @property
+    def is_deep_timeout(self):
+        return self.elapsed > self.deep_timeout
+
+
+class BlockTimeMonitor:
     def __init__(self):
         self.temporary_disabled = False
 
     def monitor(self, blocktime):
-        if blocktime > datetime.datetime(3000, 1, 1):
+        if blocktime > datetime(3000, 1, 1):
             if not self.temporary_disabled:
                 logging.info("GPS is in 3236 state.")
                 self.device.disable_writings()
