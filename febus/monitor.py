@@ -117,6 +117,7 @@ class TimeMonitor:
     def __init__(self, device):
         self.device = device
         self.temporary_disabled = False
+        self.wait_for_next_gpstime = False
 
     def monitor(self, gpstime):
         if gpstime > datetime.datetime(3000, 1, 1):
@@ -124,11 +125,15 @@ class TimeMonitor:
                 logging.info("GPS is in 3236 state.")
                 self.device.disable_writings()
                 self.temporary_disabled = True
+                self.wait_for_next_gpstime = True
         else:
             if self.temporary_disabled:
                 logging.info("GPS time recovered.")
-                self.device.enable_writings()
                 self.temporary_disabled = False
+            elif self.wait_for_next_gpstime:
+                logging.info("Ready to enable writings.")
+                self.device.enable_writings()
+                self.wait_for_next_gpstime = False
 
 
 class FileMonitor:
