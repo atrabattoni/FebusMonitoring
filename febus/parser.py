@@ -5,7 +5,7 @@ import re
 def parse(line):
     parsers = [parse_newloop, parse_walltime, parse_pulse, parse_trigger,
                parse_block, parse_writing, parse_coprocessing, parse_timeout,
-               parse_ready, parse_error]
+               parse_ready, parse_gpstime, parse_error]
     out = {}
     for parser in parsers:
         out.update(parser(line))
@@ -23,6 +23,17 @@ def parse_error(line):
 def parse_newloop(line):
     if "New loop" in line:
         return {"newloop": True}
+    else:
+        return {}
+
+
+def parse_gpstime(line):
+    pattern = r"GENEPULSE Sending TimeStamp:(?P<gpstime>\d+)"
+    m = re.match(pattern, line)
+    if m is not None:
+        gpstime = int(m.group("gpstime"))
+        gpstime = datetime.datetime.utcfromtimestamp(gpstime)
+        return {"gpstime": gpstime}
     else:
         return {}
 

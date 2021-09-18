@@ -42,8 +42,8 @@ class Monitor:
                         spinner.spin()
                     if "timeout" in info:
                         self.callback_timeout()
-                    if "blocktime" in info:
-                        self.time_monitor.monitor(info["blocktime"])
+                    if "gpstime" in info:
+                        self.time_monitor.monitor(info["gpstime"])
                     if "writingtime" in info:
                         out = self.file_monitor.monitor()
                         info.update(out)
@@ -117,8 +117,8 @@ class TimeMonitor:
     def __init__(self):
         self.temporary_disabled = False
 
-    def monitor(self, blocktime):
-        if blocktime > datetime.datetime(3000, 1, 1):
+    def monitor(self, gpstime):
+        if gpstime > datetime.datetime(3000, 1, 1):
             if not self.temporary_disabled:
                 logging.info("GPS is in 3236 state.")
                 self.device.disable_writings()
