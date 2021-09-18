@@ -18,7 +18,7 @@ class Monitor:
         gps = self.config["server"]["gps"]
         data_processor = config["monitor"]["data_processor"]
         self.device = FebusDevice(gps=gps)
-        self.time_monitor = TimeMonitor()
+        self.time_monitor = TimeMonitor(self.device)
         self.file_monitor = FileMonitor(data_processor=data_processor)
         self.state = State()
         self.stream = Stream()
@@ -114,7 +114,8 @@ class Spinner:
 
 
 class TimeMonitor:
-    def __init__(self):
+    def __init__(self, device):
+        self.device = device
         self.temporary_disabled = False
 
     def monitor(self, gpstime):
