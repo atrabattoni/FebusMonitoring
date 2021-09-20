@@ -120,7 +120,7 @@ class TimeMonitor:
         self.wait_for_next_gpstime = False
 
     def monitor(self, gpstime):
-        if gpstime > datetime.datetime(3000, 1, 1):
+        if gpstime > datetime.datetime(2030, 1, 1):
             if not self.temporary_disabled:
                 logging.info("GPS is in 3236 state.")
                 self.device.disable_writings()
