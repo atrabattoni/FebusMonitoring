@@ -71,7 +71,7 @@ def parse_trigger(line):
 
 
 def parse_block(line):
-    pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) (?P<blocktime>\d*\.?\d*) \|realtime: (?P<realtime>\d*\.?\d*)\| \d*\.?\d* -?\d*\.?\d*"
+    pattern = r"\t\t\tCoProcessing (?P<blockid>\d+) (?P<blocktime>\d*\.?\d*) \|realtime: (?P<realtime>\d*\.?\d*)\| -?\d*\.?\d* -?\d*\.?\d*"
     m = re.match(pattern, line)
     if m is not None:
         blockid = int(m.group("blockid"))
